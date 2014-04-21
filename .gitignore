@@ -1,0 +1,13 @@
+#############
+#  various  #
+#############
+/doc/tags
+*.swp
+
+#################
+#  runVimTests  #
+#################
+tests/*.out
+tests/*.tap
+tests/*.msgout
+tests/*.msgresult
