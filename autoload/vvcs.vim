@@ -40,7 +40,7 @@ function! vvcs#handlePath(path) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    let ret = fnamemodify(a:path, ":p")
    if !isdirectory(ret) && !filereadable(ret)
-      call vvcs#error('invalid path: '.a:path)
+      call vvcs#error("invalid path: '".ret."'")
       return ''
    endif
    return ret
@@ -93,6 +93,10 @@ let g:vvcs#op = {
    \'checkout' : {
          \'args' : ['<path>'],
          \'cmd': "ct co -nc ".g:vvcs_remote_mark."<path>",
+   \},
+   \'commit' : {
+         \'args' : ['<path>', '<comment>'],
+         \'cmd': 'ct ci -c \"<comment>\" '.g:vvcs_remote_mark.'<path>',
    \},
    \'-c' : {
          \'args' : ['<cmd>'],
@@ -198,7 +202,7 @@ function! vvcs#diffLine() " {{{1
    exe s:compareFile[1].winNr.'wincmd w'
    quit
    exe s:compareFile[0].winNr.'wincmd w'
-   set modifiable
+   setlocal modifiable
    normal! ggdG
    call vvcs#diffDisplay(file)
 endfunction
@@ -211,6 +215,7 @@ function! vvcs#setTempBuffer() " {{{1
    setlocal bufhidden=delete
    setlocal noswapfile
    setlocal nomodifiable
+   setlocal textwidth=0 " avoid automatic line break
 endfunction
 
 function! vvcs#command(cmd, ...) " {{{1
@@ -273,18 +278,18 @@ function! vvcs#codeReview() " {{{1
    " procedure: match any line starting with '/path/file@@version/N' that
    " isn't doesn't contains ';' or 'LATEST', copy it, append ';' followed by the
    " copy, replacing the 'N' by 'LATEST'
-   set tw=0 " avoid automatic line break
+   setlocal textwidth=0 " avoid automatic line break
    g/\v^[^@;]*\@\@((;|latest)@!.)*$/normal! y$A ; 0dvT/aLATEST
    call vvcs#setTempBuffer()
    let s:compareFile[2].bufNr = bufnr('%')
    wincmd J
-   set cursorline
+   setlocal cursorline
    resize 8
-   set winfixheight
+   setlocal winfixheight
    call vvcs#compareFilesCommonMappings()
    " highlight filenames
    match SpecialKey /^.\{-}[/\\]\zs[^/\\]\+\ze@@/
-   set nowrap
+   setlocal nowrap
    " TODO use argument to vvcs#compareFiles on the mappings instead of
    " s:CompareFileFunc in order to allow more than one simultaneous
    " comparison; s:CompareFileFunc should be changed to b:CompareFileFunc on
@@ -300,7 +305,7 @@ function! vvcs#codeReview() " {{{1
    "  Open the first diff  "
    """""""""""""""""""""""""
    " trigger the diff on the first line of the list
-   exe "normal \<CR>"
+   normal J
 endfunction
 
 function! vvcs#codeReviewOpen() " {{{1
@@ -320,7 +325,7 @@ function! vvcs#codeReviewOpen() " {{{1
    for i in range(2)
       exe s:compareFile[i].winNr.'wincmd w'
       diffoff
-      setl modifiable
+      setlocal modifiable
       normal! ggdG
       exe 'silent file '.s:VVCS_CODE_REVIEW_DIFF_LABEL[i].'\ '.
                \ substitute(file[i], '@.*','','')
@@ -331,7 +336,7 @@ function! vvcs#codeReviewOpen() " {{{1
          " check before 'diffthis' to avoid redraw problem when file is empty
          diffthis
       endif
-      setl nomodifiable
+      setlocal nomodifiable
    endfor
 endfunction
 
@@ -358,13 +363,22 @@ let s:compareFile = [
          \ {'name' : 'second diff' , 'bufNr' : -1 , 'winNr' : -1},
          \ {'name' : 'file list'   , 'bufNr' : -1 , 'winNr' : -1},
 \ ]
+" TODO after moving to a separate dict this could be set only on
+" vvcs#listCheckedOut
+let s:compareMarkers = [
+         \ s:VVCS_STAGED_MARKER,
+         \ s:VVCS_NOT_STAGED_MARKER,
+\ ]
 
 function! vvcs#compareFiles(offset) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Handle selection of a line in the file list. 
-" The offset parameter indicates the line relative to current cursor position
-" Function refence s:CompareFileFunc is called when the cursor is on the line
-" contatining information about the files to be compared.
+" Handle selection of a line in the file list.
+" The offset parameter indicates the line relative to current cursor position.
+" Empty lines and lines starting with any of the strings on the compareMarkers
+" list are skipped.
+"
+" Function reference s:CompareFileFunc is called when the cursor is on the line
+" containing information about the files to be compared.
 " It expects that s:compareFile dict contains the bufNumber for each of the
 " comparison windows on current tab page.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -381,8 +395,8 @@ function! vvcs#compareFiles(offset) " {{{1
    exe s:compareFile[2].winNr.'wincmd w'
    call cursor(line('.') + a:offset, 0)
 
-   " skip empty lines
-   while getline('.') !~ '\S'
+   " skip empty and marker lines
+   while getline('.') !~ '\S' || index(s:compareMarkers, getline('.')) != -1
       if (a:offset >= 0 && line('.') == line('$')) ||
                \ (a:offset < 0 && line('.') == 1)
          return
@@ -397,12 +411,13 @@ function! vvcs#compareFiles(offset) " {{{1
    exe s:compareFile[0].winNr.'wincmd w'
    if line('$') > 1
       normal! gg]c
+      " try to avoid some redraw problems
+      wincmd b
+      wincmd p
       redraw!
    else
       diffo!
       exe s:compareFile[1].winNr.'wincmd w'
-      " wincmd b
-      " wincmd p
    endif
 endfunction
 
@@ -436,13 +451,13 @@ function! vvcs#listCheckedOut() " {{{1
    call vvcs#setTempBuffer()
    let s:compareFile[2].bufNr = bufnr('%')
    wincmd J
-   set cursorline
+   setlocal cursorline
    resize 8
-   set winfixheight
+   setlocal winfixheight
    call vvcs#compareFilesCommonMappings()
    " highlight filenames
    match SpecialKey /^.\{-}[/\\]\zs[^/\\]\+\ze@@/
-   set nowrap
+   setlocal nowrap
    " TODO use argument to vvcs#compareFiles on the mappings instead of
    " s:CompareFileFunc in order to allow more than one simultaneous comparison
    let s:CompareFileFunc = function('vvcs#diffLine')
@@ -450,6 +465,7 @@ function! vvcs#listCheckedOut() " {{{1
    nnoremap <buffer> <silent> J :call vvcs#compareFiles(1)<CR>
    nnoremap <buffer> <silent> K :call vvcs#compareFiles(-1)<CR>
    nnoremap <buffer> <silent> - :call vvcs#toggleStaged()<CR>
+   nnoremap <buffer> <silent> <leader>cc :call vvcs#commitList()<CR>
    1  " start on the first line
 
    """""""""""""""""""""""""
@@ -489,19 +505,18 @@ function! vvcs#toggleStaged() " {{{1
    if getline('.') !~ '\S'
       return
    endif
-   set modifiable
+   setlocal modifiable
    let cLine = line('.')
    " check current state of the file - expects that staged files appears at
    " the beginning, followed by not staged files
-   let startStagedPos = search(s:VVCS_NOT_STAGED_MARKER, 'bW')
-   if startStagedPos != 0
+   let startNotStaged = search(s:VVCS_NOT_STAGED_MARKER, 'bW')
+   if startNotStaged != 0
       let commitMsg = input("Commit message: ", "")
       if commitMsg =~ '\S'
          let lastStaged = search('\S', 'bW')
          exe cLine.'move '.lastStaged
          exe "normal! A\t".s:VVCS_COMMIT_MSG_MARKER.' '.commitMsg
-      else
-         exe cLine
+         let cLine += 1    " made the cursor end on the next not staged file
       endif
    else
       $ " move to end of file
@@ -510,10 +525,37 @@ function! vvcs#toggleStaged() " {{{1
       call setline('.', substitute(getline('.'), '\s*'.
                \ s:VVCS_COMMIT_MSG_MARKER.'.*', '', ''))
    endif
-   set nomodifiable
+   setlocal nomodifiable
+   " restore cursor position when successful or aborting (no commit msg)
+   exe cLine
+endfunction
+
+function! vvcs#commitList() " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Commit stated files using the comment on the same line
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   """""""""""""""""""
+   "  Retrieve list  "
+   """""""""""""""""""
+   let startStaged = search(s:VVCS_STAGED_MARKER, 'w')
+   let startNotStaged = search(s:VVCS_NOT_STAGED_MARKER, 'w')
+   let lines = getline(startStaged+1, startNotStaged-1)
+   call filter(lines, 'v:val =~ "\S"') " remove blank lines
+   call map(lines, 'substitute(v:val, ''^\s\+\|\s\+$'', "", "g")') " trim
+   for line in lines
+      let piece = split(line, '\s*'.s:VVCS_COMMIT_MSG_MARKER.'\s*') 
+      " remove any version identifier
+      let filename = substitute(piece[0], '@@.*', '', '')
+      " TODO: execute 'up' on the containing dir and check that the file
+      " doesn't appear on the list to verify that the commit is being
+      " performed on the correct content - notify the user if the file on
+      " remote is different
+      call g:vvcs#op.execute('commit', 1, filename, piece[1])
+      " TODO: after implementing error checking execute 'down' as the file may
+      " have changed to 'readonly'
+   endfor
 endfunction
 
 
 
-
-" vim: set ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :
+" vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :
