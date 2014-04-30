@@ -8,16 +8,40 @@ if exists('g:loaded_vvcs') || &cp || version < 700
 endif
 let g:loaded_vvcs = 1
 
-command! -nargs=0 VcDiff call vvcs#diff(expand("%:p"))
-nnoremap <leader>vd :VcDiff<CR>
+" Commands {{{1
 command! -complete=file -nargs=? VcUp call vvcs#command('up', <f-args>)
-nnoremap <leader>vu :update <bar> VcUp<CR>
 command! -complete=file -nargs=? VcDown call vvcs#command('down', <f-args>)
-nnoremap <leader>vw :VcDown<CR>
+command! -nargs=0 VcDiff call vvcs#diff(expand("%:p"))
 command! -nargs=0 VcCheckout call vvcs#checkout(expand("%:p"))
-nnoremap <leader>vo :VcCheckout<CR>
 command! -nargs=0 VcCodeReview call vvcs#codeReview()
-nnoremap <leader>vc :VcCodeReview<CR>
 command! -nargs=0 VcListCheckedout call vvcs#listCheckedOut()
 
+" Mappings {{{1
+if !hasmapto('<Plug>VcUpdate')
+   map <unique> <leader>vu <Plug>VcUpdate
+endif
+noremap <unique> <Plug>VcUpdate :VcUp<CR>
 
+if !hasmapto('<Plug>VcDown')
+   map <unique> <leader>vw <Plug>VcDown
+endif
+noremap <unique> <Plug>VcDown :VcDown<CR>
+
+if !hasmapto('<Plug>VcDiff')
+   map <unique> <leader>vd <Plug>VcDiff
+endif
+noremap <unique> <Plug>VcDiff :VcDiff<CR>
+
+if !hasmapto('<Plug>VcCheckout')
+   map <unique> <leader>vo <Plug>VcCheckout
+endif
+noremap <unique> <Plug>VcCheckout :VcCheckout<CR>
+
+if !hasmapto('<Plug>VcCodeReview')
+   map <unique> <leader>vc <Plug>VcCodeReview
+endif
+noremap <unique> <Plug>VcCodeReview :VcCodeReview<CR>
+
+
+
+" vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :

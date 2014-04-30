@@ -13,3 +13,8 @@ handling file synchronization and the specific commands to the underlying
 (often awkward) version control system, automating the build commands and
 displaying the results on the quickfix window.
 
+## Installation ##
+
+I recommend loading your plugins with
+[pathogen](https://github.com/tpope/vim-pathogen).
+
