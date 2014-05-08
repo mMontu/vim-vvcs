@@ -3,6 +3,9 @@
 " Description: Aid development on remote machines
 " Created: 2014 Mar 18
 
+let save_cpo = &cpo   " allow line continuation
+set cpo&vim
+
 " options {{{1
 if !exists("g:vvcs_fix_path")
    let g:vvcs_fix_path = { 'pat' : '', 'sub' : '' }
@@ -249,10 +252,24 @@ function! vvcs#codeReview() " {{{1
    """"""""""""""""""""""""
    "  Retrieve file list  "
    """"""""""""""""""""""""
-   " TODO: check has("browse") and use input() when it is not available 
    let lastDirCache = vvcs#readCacheFile(s:VVCS_CODE_REVIEW_BROWSE)
    let startDir = empty(lastDirCache) ? '.' : lastDirCache[0]
-   let fileList = browse('', 'select file list to review', startDir, '')
+   let prompt = 'select file list to review'
+   if has("browse")
+      if exists('b:browsefilter')
+         let save_browsefilter = b:browsefilter
+      endif
+      let b:browsefilter = "All Files\t*\nList Files (*.list)\t*.list\n"
+      let fileList = browse('', prompt, startDir, '')
+      if exists('save_browsefilter')
+         let b:browsefilter = save_browsefilter
+         unlet save_browsefilter
+      else
+         unlet b:browsefilter
+      endif
+   else
+      let fileList = input(prompt.': ', startDir.'/', 'file')
+   endif
    if fileList == ''
       return
    endif
@@ -560,4 +577,5 @@ endfunction
 
 
 
+let &cpo = save_cpo
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :
