@@ -43,5 +43,13 @@ endif
 noremap <unique> <Plug>VcCodeReview :VcCodeReview<CR>
 
 
+function! VvcsSystem(expr) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Wrapper for system() calls. Needed in order to intercept system() calls
+" during the tests. It is on this file in order to avoid early loading of
+" autoload during tests.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   return system(a:expr)
+endfunction
 
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :

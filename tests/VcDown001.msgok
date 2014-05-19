@@ -1,0 +1,26 @@
+
+>> Test successful invocation without arguments
+!.*Will execute: .*AuxFiles[\\/]readWrite\.h.*<local_host>:.*AuxFiles[\\/]readWrite\.h.*!
+|| receiving file list ... done
+
+/.*sent \d\+ bytes  received \d\+ bytes  \d\+\.\?\d* bytes\/sec/
+/.*total size is \d\+  speedup is \d\+\.\?\d*/
+
+>> Test successful invocation with arguments
+!.*Will execute: .*AuxFiles[\\/]readOnly\.h.*<local_host>:.*AuxFiles[\\/]readOnly\.h.*!
+|| receiving file list ... done
+
+/.*sent \d\+ bytes  received \d\+ bytes  \d\+\.\?\d* bytes\/sec/
+/.*total size is \d\+  speedup is \d\+\.\?\d*/
+
+>> Test failure due to invalid local path
+/\[vvcs plugin\] invalid path:.*/
+
+>> Test failure due to invalid remote path
+!.*Will execute: .*AuxFiles[\\/]invalidDir\.h.*!
+|| receiving file list ... done
+/.*rsync: .* failed: No such file or directory.*/
+
+>> Test failure due to ssh error
+!.*Will execute: .*AuxFiles[\\/]sshError\.h.*!
+/.*ssh: \(Could not resolve\|connect to host\).*/

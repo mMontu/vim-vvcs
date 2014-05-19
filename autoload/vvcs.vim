@@ -16,6 +16,9 @@ endif
 if !exists("g:vvcs_remote_mark")
    let g:vvcs_remote_mark = "<remote>"
 endif
+if !exists("g:vvcs_local_host")
+   let g:vvcs_local_host = "<local_host>"
+endif
 if !exists("g:vvcs_exclude_patterns")
    let g:vvcs_exclude_patterns = ['*.[ao]', '*.class', '.cmake.state', '*.swp', 
             \ 'core.[0-9][0-9]*', 'lib*.so', 'lib*.so.[0-9]', 'lost+found/',
@@ -48,6 +51,7 @@ function! vvcs#handlePath(path) " {{{1
       call vvcs#error("invalid path: '".ret."'")
       return ''
    endif
+   let ret = escape(fnameescape(ret), '\') " adapt for ms-windows paths
    return ret
 endfunction
 
@@ -119,27 +123,29 @@ let g:vvcs#op = {
    \},
 \}
 
-function! g:vvcs#op.execute(key, keepRes, ...) dict " {{{1
+function! vvcs#execute(key, keepRes, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Run the command on the g:vvcs#op dict for the specified key. The
 " quickfix is filled with the log of the execution. If keepRes is not set the
 " quickfix is cleared before start logging.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   if !has_key(self, a:key)
+   if !has_key(g:vvcs#op, a:key)
       call vvcs#error('unknown command: ' . a:key)
       return 1
    endif
-   if a:0 != len(self[a:key].args)
+   if a:0 != len(g:vvcs#op[a:key].args)
       echom "incorrect number of parameters for '".a:key."': ".string(a:000)
       return 1
    endif
 
-   let cmd = self[a:key].cmd
-   for i in range(len(self[a:key].args))
-      let par = self[a:key].args[i]
+   let cmd = g:vvcs#op[a:key].cmd
+   for i in range(len(g:vvcs#op[a:key].args))
+      let par = g:vvcs#op[a:key].args[i]
       let val = a:000[i]
       if par =~# 'path'
          let val = vvcs#handlePath(val)
+         " duplicate escapes as the substitute() below will remove them
+         let val = escape(val, '\') 
          if val == ''
             return 1
          endif
@@ -152,15 +158,16 @@ function! g:vvcs#op.execute(key, keepRes, ...) dict " {{{1
    endfor
 
    exe (a:keepRes ?'caddexp' : 'cgetexpr').' "Will execute: '.cmd.'"'
-   if !has_key(self[a:key], 'inlineResult')
+   let systemOut = VvcsSystem(printf(g:vvcs_remote_cmd, cmd))
+   if !has_key(g:vvcs#op[a:key], 'inlineResult')
       " caddexp printf(g:vvcs_remote_cmd, cmd)
-      caddexp system(printf(g:vvcs_remote_cmd, cmd))
+      caddexp systemOut
       if exists('g:vvcs_debug')
          copen
          wincmd p
       endif
    else
-      exe "read !".printf(g:vvcs_remote_cmd, cmd)
+      put =systemOut
       normal! ggdd
    endif
 endfunction
@@ -185,7 +192,7 @@ function! vvcs#diffDisplay(file) " {{{1
 " Update s:compareFile variable accordingly.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    " exe "read !rf pred " . a:file
-   call g:vvcs#op.execute('pred', 0, a:file)
+   call vvcs#execute('pred', 0, a:file)
    call vvcs#setTempBuffer()
    call vvcs#compareFilesCommonMappings()
    diffthis
@@ -225,13 +232,13 @@ endfunction
 
 function! vvcs#command(cmd, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" same as vvc#op.execute(), using the current file as argument if none is
-" available
+" same as vvc#op.execute(), using the current file as optional argument if
+" none is available. Requires a single optional argument.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    if a:0 == 1
-      call g:vvcs#op.execute(a:cmd, 0, a:1)
+      call vvcs#execute(a:cmd, 0, a:1)
    else
-      call g:vvcs#op.execute(a:cmd, 0, expand("%:p"))
+      call vvcs#execute(a:cmd, 0, expand("%:p"))
    endif
    checktime  " warn for loaded files changed outside vim
 endfunction
@@ -240,8 +247,8 @@ function! vvcs#checkout(file) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Checkout and retrieve the specified file
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   call g:vvcs#op.execute('checkout', 0, a:file)
-   call g:vvcs#op.execute('down', 1, a:file)
+   call vvcs#execute('checkout', 0, a:file)
+   call vvcs#execute('down', 1, a:file)
    checktime  " warn for loaded files changed outside vim
 endfunction
 
@@ -348,7 +355,7 @@ function! vvcs#codeReviewOpen() " {{{1
       normal! ggdG
       exe 'silent file '.s:VVCS_CODE_REVIEW_DIFF_LABEL[i].'\ '.
                \ substitute(file[i], '@.*','','')
-      call g:vvcs#op.execute('-cInlineResult', i, 'cat '.file[i])
+      call vvcs#execute('-cInlineResult', i, 'cat '.file[i])
       " trigger autocmd to detect filetype and execute any filetype plugins
       doautocmd BufNewFile
       if line('$') > 1
@@ -463,7 +470,7 @@ function! vvcs#listCheckedOut() " {{{1
    call append(4, '')
    4
    "  Retrieve file list
-   silent call g:vvcs#op.execute('checkedoutList', 0)
+   silent call vvcs#execute('checkedoutList', 0)
    " change output to '/path/file@@version/N'
    %s/\v.*"([^"]+)"\s+from\s+(\S+).*/\1@@\2/e
    exe 'silent file '.s:VVCS_CODE_REVIEW_LIST_TITLE
@@ -569,7 +576,7 @@ function! vvcs#commitList() " {{{1
       " doesn't appear on the list to verify that the commit is being
       " performed on the correct content - notify the user if the file on
       " remote is different
-      call g:vvcs#op.execute('commit', 1, filename, piece[1])
+      call vvcs#execute('commit', 1, filename, piece[1])
       " TODO: after implementing error checking execute 'down' as the file may
       " have changed to 'readonly'
    endfor

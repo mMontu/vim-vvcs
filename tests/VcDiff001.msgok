@@ -1,0 +1,20 @@
+>> Test successful invocation
+!.*"AuxFiles[\\/]readOnly.h".*!
+
+>>> contents of first window
+  diff
+readOnly.h contents
+>>> contents of second window
+  diff
+readOnly.h previous contents
+
+>> Test failure due to invalid remote path
+!.*"AuxFiles[\\/]invalidDir.h".*!
+
+>>> contents of first window
+  diff
+invalidDir.h contents
+>>> contents of second window
+  diff
+cleartool: Error: Unable to access "/AuxFiles/invalidDir.h": No such file or directory.
+

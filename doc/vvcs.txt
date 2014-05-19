@@ -17,7 +17,8 @@ CONTENTS                                                       *vvcs-contents*
     3. Mappings.....................................|vvcs-mappings|
     4. Options......................................|vvcs-options|
     5. Input Formats................................|vvcs-input-formats|
-    6. About........................................|vvcs-about|
+    6. Extending....................................|vvcs-extending|
+    7. About........................................|vvcs-about|
 
 ==============================================================================
 INTRODUCTION                                                    *vvcs-intro*
@@ -35,10 +36,66 @@ handling file synchronization and the specific commands to the underlying
 (often awkward) version control system, automating the build commands and
 displaying the results on the quickfix window.
 
+Currently it only handles ClearCase, but it should be easy to extend it to
+other version control systems. See |vvcs-extending|.
+
 ==============================================================================
 COMMANDS                                                        *vvcs-commands*
 
-TODO
+                                                                        *:VcUp*
+:VcUp [path]            Send the files on specified path to remote machine. If
+                        no path is specified then it acts on the current file
+                        (|%:p|). This default shall probably change on future
+                        versions to the path of the subproject of the current
+                        file.
+
+                                                                     *:VcDown*
+:VcDown [path]          Retrieve the files on specified path from the remote
+                        machine.  If no path is specified then it acts on the
+                        current file (|%:p|). This default shall probably
+                        change on future versions to the path of the
+                        subproject of the current file.
+
+                                                                     *:VcDiff*
+:VcDiff                 Open a new tab page displaying the diff between the
+                        current file and its previous version. The following
+                        mappings are available on the scratch window: >
+
+                        J or <c-down>   jump to next difference
+                        K or <c-up>     jump to previous difference
+                        q               end the comparison, close the tab page
+<
+
+                                                                  *:VcCheckout*
+:VcCheckout             Perform checkout on the current file.
+
+                                                               *:VcCodeReview*
+:VcCodeReview           Asks for an input file on one of the supported formats
+                        (as described in |vvcs-input|) and opens a new tab
+                        page to display the differences between the specified
+                        version of each file.  In addition to the mappings of
+                        |:VcDiff|, the following mappings are available: >
+
+                        On the diff windows:
+                        <leader>j       open diff for the next files
+                        <leader>k       open diff for the previous files
+                        
+                        On the list window:
+                        <cr>            open diff for the files on current line
+                        J               open diff for the next files
+                        K               open diff for the previous files
+<
+
+                                                            *:VcListCheckedout*
+:VcListCheckedout       List the checkdout files and allow for diff with the
+                        previous version. It behaves similar to |:VcCodeReview|
+                        command, but it has additional mappings on the list
+                        window: >
+                        
+                        -               toggle the file 'staged for commit
+                                        status'
+                        <leader>cc      commit all the files staged for commit
+<
 
 ==============================================================================
 KEY MAPPINGS                                                    *vvcs-mappings*
@@ -54,12 +111,68 @@ By default, vvcs adds the following mappings:
 ==============================================================================
 OPTIONS                                                         *vvcs-options*
 
-TODO
+                                                         *'g:vvcs_remote_cmd'*
+Use this option to indicate how remote commands shall be transmitted: >
+
+   let g:vvcs_remote_branch = 'myClearCaseBranch'
+   let g:vvcs_remote_cmd =  'ssh hostNameOrAddress "cleartool setview -login'.
+            \' -exec ''%s'' '.g:vvcs_remote_branch.'"'
+<
+This example connects on remote machine through ssh, sets the ClearCase
+view and execute the remote command, which will substitute the `%s` string.
+
+It is useful to avoid entering the ssh password for every command executed;
+this can be accomplished using a public/private rsa key pair, as explained
+here: http://www.linuxproblem.org/art_9.html
+
+                                                         *'g:vvcs_local_host'*
+This variable shall be set the local host address. It is used to from ssh
+connection on the remote machine to move files to the local machine: >
+
+   let g:vvcs_local_host = 'user@192.168.123.456'
+<
+This information is necessary because in some cases it is not possible to use
+rsync/scp from local machine to retrieve remote files, as these commands may
+not be present on local machine or because the files will only be available
+after some configuration on remote host -- for ClearCase it is necessary to
+set the view to make the files available.
+
+
+                                                            *'g:vvcs_cache_dir'*
+Set the directory to store the cache files. Default: >
+
+   let g:vvcs_cache_dir = $HOME.'/.cache/vvcs'
+<
+
+                                                            *'g:vvcs_fix_path'*
+Use this option to make the project path on the local machine match the
+correspondent path on the remote machine: >
+
+   let g:vvcs_fix_path = {'pat' : '^/home/myuser/work', 'sub' : '/vobs/proj1'}
+<
+This option is used on a |substitute()| call, thus the example above works
+when the contents of the remote folder /vobs/proj1 were copied into ~/work/
+folder of the local machine.
+
+
+                                                   *'g:vvcs_exclude_patterns'*
+The contents of this option is used to avoid transfer unimportant files
+between the local and remote machine. Default: >
+
+   let g:vvcs_exclude_patterns = ['*.[ao]', '*.class', '.cmake.state', '*.swp', 
+            \ 'core.[0-9][0-9]*', 'lib*.so', 'lib*.so.[0-9]', 'lost+found/',
+            \ '*.jar', '*.gz']
+<
 
 ==============================================================================
 INPUT FORMATS                                             *vvcs-input-formats*
 
 TODO - input files for code review
+
+==============================================================================
+EXTENDING                                                 *vvcs-extending*
+
+TODO
 
 ==============================================================================
 ABOUT                                                           *vvcs-about*
