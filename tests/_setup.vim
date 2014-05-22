@@ -64,7 +64,26 @@ function! VvcsSystem(expr)
          endfor
       endif
    endfor
-   return "no stub for '".a:expr."' (remoteCmd = ".remoteCmd.")"
+   return "VvcsSystem: no stub for '".a:expr."' (remoteCmd = ".remoteCmd.")"
 endfunction
 
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"                            Stub for input calls                            "
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:inputStub = {
+   \'list to review' : "abc\ndef\nghi",
+   \'Commit message' : "commmitMsg",
+\}
+
+function! VvcsInput(...)
+   if a:0 > 0
+      for key in keys(g:inputStub)
+         if match(a:1, key) != -1
+            return g:inputStub[key]
+         endif
+      endfor
+   endif
+   return "VvcsInput: no stub for '".string(a:000)."'"
+endfunction
 

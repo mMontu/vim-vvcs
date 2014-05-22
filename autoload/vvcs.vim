@@ -275,7 +275,7 @@ function! vvcs#codeReview() " {{{1
          unlet b:browsefilter
       endif
    else
-      let fileList = input(prompt.': ', startDir.'/', 'file')
+      let fileList = VvcsInput(prompt.': ', startDir.'/', 'file')
    endif
    if fileList == ''
       return
@@ -438,7 +438,8 @@ function! vvcs#compareFiles(offset) " {{{1
    if line('$') > 1
       normal! gg]c
       " try to avoid some redraw problems
-      wincmd b
+      exe s:compareFile[1].winNr.'wincmd w'
+      normal! gg]c
       wincmd p
       redraw!
    else
@@ -537,7 +538,7 @@ function! vvcs#toggleStaged() " {{{1
    " the beginning, followed by not staged files
    let startNotStaged = search(s:VVCS_NOT_STAGED_MARKER, 'bW')
    if startNotStaged != 0
-      let commitMsg = input("Commit message: ", "")
+      let commitMsg = VvcsInput("Commit message: ", "")
       if commitMsg =~ '\S'
          let lastStaged = search('\S', 'bW')
          exe cLine.'move '.lastStaged

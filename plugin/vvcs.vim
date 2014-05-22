@@ -45,11 +45,17 @@ noremap <unique> <Plug>VcCodeReview :VcCodeReview<CR>
 
 function! VvcsSystem(expr) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Wrapper for system() calls. Needed in order to intercept system() calls
-" during the tests. It is on this file in order to avoid early loading of
-" autoload during tests.
+" Wrapper for system() calls. Needed in order to intercept during the tests.
+" It is on this file in order to avoid early loading of autoload during tests.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    return system(a:expr)
+endfunction
+
+function! VvcsInput(...) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Wrapper for input() calls. Needed in order to intercept during the tests.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   return call(function("input"), a:000)
 endfunction
 
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :
