@@ -2,19 +2,23 @@
 !.*"AuxFiles[\\/]readOnly.h".*!
 
 >>> contents of first window
-  diff
-readOnly.h contents
->>> contents of second window
+
+/"\[Scratch]".*/
   diff
 readOnly.h previous contents
+>>> contents of second window
+
+/"AuxFiles/readOnly.h".*/
+  diff
+readOnly.h contents
 
 >> Test failure due to invalid remote path
 !.*"AuxFiles[\\/]invalidDir.h".*!
 
 >>> contents of first window
   diff
-invalidDir.h contents
+cleartool: Error: Unable to access "/AuxFiles/invalidDir.h": No such file or directory.
 >>> contents of second window
   diff
-cleartool: Error: Unable to access "/AuxFiles/invalidDir.h": No such file or directory.
+invalidDir.h contents
 

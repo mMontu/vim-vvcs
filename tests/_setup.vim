@@ -27,6 +27,9 @@ let s:systemStub = {
          \'invalidDir.h': 'cleartool: Error: Unable to access '.
          \   '"/AuxFiles/invalidDir.h": No such file or directory.',
    \},
+   \'\<cat\> \S*@@\S*$': {
+         \'readOnly.h' : '%s contents',
+   \},
    \'\<ct co\>' : {
          \'readOnly.h': 'Checked out "/AuxFiles/readOnly.h" from version '.
          \  '"/main/myBranch/2".',
@@ -59,7 +62,12 @@ function! VvcsSystem(expr)
       if match(remoteCmd, cmd) != -1
          for key in keys(s:systemStub[cmd])
             if match(remoteCmd, key) != -1
-               return s:systemStub[cmd][key]
+               if match(s:systemStub[cmd][key], '%s') != -1
+                  return substitute(s:systemStub[cmd][key], '%s', 
+                           \ split(remoteCmd)[1], '')
+               else
+                  return s:systemStub[cmd][key]
+               endif
             endif
          endfor
       endif
@@ -72,7 +80,7 @@ endfunction
 "                            Stub for input calls                            "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:inputStub = {
-   \'list to review' : "abc\ndef\nghi",
+   \'list to review' : "missing initialization: g:inputStub['list to review']",
    \'Commit message' : "commmitMsg",
 \}
 

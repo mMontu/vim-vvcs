@@ -192,11 +192,14 @@ function! vvcs#diffDisplay(file) " {{{1
 " Update s:compareFile variable accordingly.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    " exe "read !rf pred " . a:file
+   vnew
+   1wincmd w
    call vvcs#execute('pred', 0, a:file)
    call vvcs#setTempBuffer()
    call vvcs#compareFilesCommonMappings()
    diffthis
-   exe "vs " . a:file
+   2wincmd w
+   exe "edit " . a:file
    let s:compareFile[1].bufNr = bufnr('%')
    let currentFt = &filetype
    diffthis
@@ -287,11 +290,13 @@ function! vvcs#codeReview() " {{{1
    "  Open new tab and display file list  "
    """"""""""""""""""""""""""""""""""""""""
    tabe
+   vnew
+   1wincmd w
    call vvcs#setTempBuffer()
    let s:compareFile[0].bufNr = bufnr('%')
    call vvcs#compareFilesCommonMappings()
    exe 'silent file '.s:VVCS_CODE_REVIEW_DIFF_LABEL[0]
-   vnew
+   2wincmd w
    call vvcs#setTempBuffer()
    let s:compareFile[1].bufNr = bufnr('%')
    call vvcs#compareFilesCommonMappings()
@@ -305,7 +310,7 @@ function! vvcs#codeReview() " {{{1
    " isn't doesn't contains ';' or 'LATEST', copy it, append ';' followed by the
    " copy, replacing the 'N' by 'LATEST'
    setlocal textwidth=0 " avoid automatic line break
-   g/\v^[^@;]*\@\@((;|latest)@!.)*$/normal! y$A ; 0dvT/aLATEST
+   silent g/\v^[^@;]*\@\@((;|latest)@!.)*$/normal! y$A ; 0dvT/aLATEST
    call vvcs#setTempBuffer()
    let s:compareFile[2].bufNr = bufnr('%')
    wincmd J
@@ -458,6 +463,9 @@ function! vvcs#listCheckedOut() " {{{1
    """"""""""""""""""""""""""""""""""""""""
    tabe
    call vvcs#setTempBuffer()
+   " TODO: factor out the creation of the new tab from this function and reuse
+   " it in vvcs#codeReview() and vvcs#diffDisplay() functions, which already
+   " contain the fix for issue #8
    let s:compareFile[0].bufNr = bufnr('%')
    call vvcs#compareFilesCommonMappings()
    silent file Previous\ Version

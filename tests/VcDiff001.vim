@@ -1,15 +1,18 @@
 " Test 'VcDiff' command 
 
+" set splitright
 echomsg '>> Test successful invocation'
 edit AuxFiles/readOnly.h 
 VcDiff
 " echo the contents of each window
-1wincmd w
 echomsg '>>> contents of first window'
+1wincmd w
+exec "normal \<c-g>"
 set diff?
 g/^/
-2wincmd w
 echomsg '>>> contents of second window'
+2wincmd w
+exec "normal \<c-g>"
 set diff?
 g/^/
 tabc

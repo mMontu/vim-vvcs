@@ -1,0 +1,16 @@
+
+>> Test successful invocation
+
+echo the first window
+
+/"OLD AuxFiles/readOnly.h".*/
+AuxFiles/readOnly.h@@/main/myBranch/1 contents
+echo the second window
+
+/"NEW AuxFiles/readOnly.h".*/
+AuxFiles/readOnly.h@@/main/myBranch/LATEST contents
+echo the third window
+
+/"CodeReview: AuxFiles/ReviewList1".*/
+ 
+AuxFiles/readOnly.h@@/main/myBranch/1 ; AuxFiles/readOnly.h@@/main/myBranch/LATEST
