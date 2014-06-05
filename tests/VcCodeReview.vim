@@ -1,23 +1,17 @@
 " Test 'VcCodeReview' command 
 
+function! TestCodeReview(msg, reviewFile)
+   exe "echomsg '".a:msg."'"
+   let g:inputStub['list to review'] = a:reviewFile
+   VcCodeReview
+   call EchoAllWindows()
+   normal q
+endfunction
+
 
 " set splitright
-echomsg '>> Test successful invocation'
-let g:inputStub['list to review'] = "AuxFiles/ReviewList1"
-VcCodeReview
-echomsg 'echo the first window'
-1wincmd w
-exec "normal \<c-g>"
-g/^/
-
-echomsg 'echo the second window'
-2wincmd w
-exec "normal \<c-g>"
-g/^/
-
-echomsg 'echo the third window'
-3wincmd w
-exec "normal \<c-g>"
-g/^/
+call TestCodeReview('>> Test successful invocation 1', "AuxFiles/ReviewList1")
+call TestCodeReview('>> Test successful invocation 2',"AuxFiles/ReviewList2")
+call TestCodeReview('>> Test successful invocation 3',"AuxFiles/ReviewList3")
 
 call vimtest#Quit()

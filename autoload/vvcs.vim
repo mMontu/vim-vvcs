@@ -310,7 +310,7 @@ function! vvcs#codeReview() " {{{1
    " isn't doesn't contains ';' or 'LATEST', copy it, append ';' followed by the
    " copy, replacing the 'N' by 'LATEST'
    setlocal textwidth=0 " avoid automatic line break
-   silent g/\v^[^@;]*\@\@((;|latest)@!.)*$/normal! y$A ; 0dvT/aLATEST
+   silent! g/\v^[^@;]*\@\@((;|latest)@!.)*$/normal! y$A ; 0dvT/aLATEST
    call vvcs#setTempBuffer()
    let s:compareFile[2].bufNr = bufnr('%')
    wincmd J
@@ -336,7 +336,7 @@ function! vvcs#codeReview() " {{{1
    "  Open the first diff  "
    """""""""""""""""""""""""
    " trigger the diff on the first line of the list
-   normal J
+   exe "normal \<CR>"
 endfunction
 
 function! vvcs#codeReviewOpen() " {{{1
@@ -362,8 +362,8 @@ function! vvcs#codeReviewOpen() " {{{1
                \ substitute(file[i], '@.*','','')
       call vvcs#execute('-cInlineResult', i, 'cat '.file[i])
       " trigger autocmd to detect filetype and execute any filetype plugins
-      doautocmd BufNewFile
-      if line('$') > 1
+      silent doautocmd BufNewFile
+      if line('$') > 1 || getline(1) != ''
          " check before 'diffthis' to avoid redraw problem when file is empty
          diffthis
       endif
@@ -381,7 +381,7 @@ function! vvcs#compareFilesCommonMappings() " {{{1
    nnoremap <buffer> J ]c
    nnoremap <buffer> K [c
    nnoremap <buffer> <silent> q 
-            \ :if confirm("Quit comparison?", "&Yes\n&No") == 1 <bar> 
+            \ :if VvcsConfirm("Quit comparison?", "&Yes\n&No") == 1 <bar> 
             \ diffo! <bar> tabc <bar> endif<CR>
    nnoremap <buffer> <silent> <leader>j :call vvcs#compareFiles(1)<CR>
    nnoremap <buffer> <silent> <leader>k :call vvcs#compareFiles(-1)<CR>

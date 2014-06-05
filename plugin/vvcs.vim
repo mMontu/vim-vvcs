@@ -57,5 +57,11 @@ function! VvcsInput(...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    return call(function("input"), a:000)
 endfunction
+function! VvcsConfirm(...) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Wrapper for confirm() calls. Needed in order to intercept during the tests.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   return call(function("confirm"), a:000)
+endfunction
 
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :

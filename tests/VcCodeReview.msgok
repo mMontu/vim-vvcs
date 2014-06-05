@@ -1,16 +1,71 @@
 
->> Test successful invocation
+>> Test successful invocation 1
+select file list to review: 
 
-echo the first window
+echo window 1:
 
-/"OLD AuxFiles/readOnly.h".*/
+/"OLD AuxFiles[\\/]readOnly.h".*/
+  diff
 AuxFiles/readOnly.h@@/main/myBranch/1 contents
-echo the second window
 
-/"NEW AuxFiles/readOnly.h".*/
-AuxFiles/readOnly.h@@/main/myBranch/LATEST contents
-echo the third window
+echo window 2:
 
-/"CodeReview: AuxFiles/ReviewList1".*/
+/"NEW AuxFiles[\\/]readOnly.h".*/
+  diff
+/AuxFiles[\\/]readOnly.h@@/main/myBranch/LATEST contents/
+
+echo window 3:
+
+/"CodeReview: AuxFiles[\\/]ReviewList1".*/
+nodiff
  
 AuxFiles/readOnly.h@@/main/myBranch/1 ; AuxFiles/readOnly.h@@/main/myBranch/LATEST
+
+
+Quit comparison?
+>> Test successful invocation 2
+select file list to review: 
+
+echo window 1:
+
+/"OLD AuxFiles[\\/]readOnly.h".*/
+  diff
+AuxFiles/readOnly.h@@/main/myBranch/1 contents
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]readOnly.h".*/
+  diff
+AuxFiles/readOnly.h@@/main/myBranch/2 contents
+
+echo window 3:
+
+/"CodeReview: AuxFiles[\\/]ReviewList2".*/
+nodiff
+ 
+AuxFiles/readOnly.h@@/main/myBranch/1 ; AuxFiles/readOnly.h@@/main/myBranch/2
+
+
+Quit comparison?
+>> Test successful invocation 3
+
+echo window 1:
+
+/"OLD AuxFiles[\\/]newFile.h".*/
+nodiff
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]newFile.h".*/
+nodiff
+AuxFiles/newFile.h@@/main/myBranch/LATEST contents
+
+echo window 3:
+
+/"CodeReview: AuxFiles[\\/]ReviewList3".*/
+nodiff
+AuxFiles/newFile.h@@/main/myBranch/0 ; AuxFiles/newFile.h@@/main/myBranch/LATEST
+
+Quit comparison?
+
+

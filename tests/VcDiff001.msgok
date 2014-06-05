@@ -8,7 +8,7 @@
 readOnly.h previous contents
 >>> contents of second window
 
-/"AuxFiles/readOnly.h".*/
+/"AuxFiles[\\/]readOnly.h".*/
   diff
 readOnly.h contents
 

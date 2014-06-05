@@ -3,6 +3,7 @@
 #############
 tags
 *.swp
+.netrwhist
 
 #################
 #  runVimTests  #
@@ -11,3 +12,4 @@ tests/*.out
 tests/*.tap
 tests/*.msgout
 tests/*.msgresult
+tests/AuxFiles/.cache

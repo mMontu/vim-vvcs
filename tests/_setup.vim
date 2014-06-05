@@ -2,6 +2,27 @@ source ../plugin/vvcs.vim
 " Mainly due to autoload folder
 let &runtimepath = expand('<sfile>:p:h:h') . ',' . &runtimepath
 
+" let the tests use their own cache directory
+let g:vvcs_cache_dir = 'AuxFiles/.cache/vvcs'
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"                             Utility functions                              "
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+function! EchoAllWindows()
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" echo the title, diff status and contents of each window
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   for i in range(1, winnr('$'))
+      exec 'echomsg "echo window '.i.':"'
+      exec i.'wincmd w'
+      exec "normal \<c-g>"
+      set diff?
+      g/^/
+   endfor
+endfunction
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                           Stub for system calls                            "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -28,7 +49,9 @@ let s:systemStub = {
          \   '"/AuxFiles/invalidDir.h": No such file or directory.',
    \},
    \'\<cat\> \S*@@\S*$': {
-         \'readOnly.h' : '%s contents',
+         \'readOnly.h' : "%s contents\n\n",
+         \'newFile\.h\S\+\/[^0]\+$' : "%s contents\n\n",
+         \'newFile\.h\S\+\/0[^\/]*$' : "",
    \},
    \'\<ct co\>' : {
          \'readOnly.h': 'Checked out "/AuxFiles/readOnly.h" from version '.
@@ -77,15 +100,17 @@ endfunction
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"                            Stub for input calls                            "
+"                            Stub for input/confirm calls                    "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:inputStub = {
    \'list to review' : "missing initialization: g:inputStub['list to review']",
    \'Commit message' : "commmitMsg",
+   \'Quit comparison' : "1",
 \}
 
 function! VvcsInput(...)
    if a:0 > 0
+      echomsg a:1
       for key in keys(g:inputStub)
          if match(a:1, key) != -1
             return g:inputStub[key]
@@ -93,5 +118,9 @@ function! VvcsInput(...)
       endfor
    endif
    return "VvcsInput: no stub for '".string(a:000)."'"
+endfunction
+
+function! VvcsConfirm(...) "
+   return call(function("VvcsInput"), a:000)
 endfunction
 
