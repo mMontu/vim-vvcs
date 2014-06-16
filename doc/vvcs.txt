@@ -48,6 +48,14 @@ COMMANDS                                                        *vvcs-commands*
                         (|%:p|). This default shall probably change on future
                         versions to the path of the subproject of the current
                         file.
+                        For ClearCase this synchronization is performed on
+                        /view/view_1/vobs/.../, which is faster than ssh to
+                        remote machine, open the dynamic view (cleartool
+                        setview view_1), then move the files. But this
+                        approach requires that the view is already mounted on
+                        the remote host. This can be achieved by adding
+                        `cleartool startview view_1` on a initialization file
+                        (e.g.: ~/.cshrc).
 
                                                                      *:VcDown*
 :VcDown [path]          Retrieve the files on specified path from the remote
@@ -111,40 +119,39 @@ By default, vvcs adds the following mappings:
 ==============================================================================
 OPTIONS                                                         *vvcs-options*
 
+                                                         *'g:vvcs_remote_host'*
+Use this option to indicate the remote host address. >
+
+   let g:vvcs_remote_host = 'user@192.168.123.321'
+<
+                                                      *'g:vvcs_remote_branch'*
+This variable shall be set to the VCS branch used on the remote machine.  >
+
+   let g:vvcs_remote_branch = 'myClearCaseBranch'
+<
                                                          *'g:vvcs_remote_cmd'*
 Use this option to indicate how remote commands shall be transmitted: >
 
-   let g:vvcs_remote_branch = 'myClearCaseBranch'
-   let g:vvcs_remote_cmd =  'ssh hostNameOrAddress "cleartool setview -login'.
+   let g:vvcs_remote_cmd = 'ssh '.g:vvcs_remote_host.
+            \ ' " cleartool setview -login'.
             \' -exec ''%s'' '.g:vvcs_remote_branch.'"'
 <
-This example connects on remote machine through ssh, sets the ClearCase
-view and execute the remote command, which will substitute the `%s` string.
+This command connects on remote machine through ssh, sets the ClearCase
+view and execute the remote command, which will substitute the `%s` string. It
+is necessary as some operations requires the ClearCase dynamic view set to
+work.
 
 It is useful to avoid entering the ssh password for every command executed;
 this can be accomplished using a public/private rsa key pair, as explained
 here: http://www.linuxproblem.org/art_9.html
 
-                                                         *'g:vvcs_local_host'*
-This variable shall be set the local host address. It is used to from ssh
-connection on the remote machine to move files to the local machine: >
-
-   let g:vvcs_local_host = 'user@192.168.123.456'
-<
-This information is necessary because in some cases it is not possible to use
-rsync/scp from local machine to retrieve remote files, as these commands may
-not be present on local machine or because the files will only be available
-after some configuration on remote host -- for ClearCase it is necessary to
-set the view to make the files available.
-
-
-                                                            *'g:vvcs_cache_dir'*
+                                                         *'g:vvcs_cache_dir'*
 Set the directory to store the cache files. Default: >
 
    let g:vvcs_cache_dir = $HOME.'/.cache/vvcs'
 <
 
-                                                            *'g:vvcs_fix_path'*
+                                                         *'g:vvcs_fix_path'*
 Use this option to make the project path on the local machine match the
 correspondent path on the remote machine: >
 

@@ -16,8 +16,11 @@ endif
 if !exists("g:vvcs_remote_mark")
    let g:vvcs_remote_mark = "<remote>"
 endif
-if !exists("g:vvcs_local_host")
-   let g:vvcs_local_host = "<local_host>"
+if !exists("g:vvcs_remote_host")
+   let g:vvcs_remote_host = "<remote_host>"
+endif
+if !exists("g:vvcs_remote_branch")
+   let g:vvcs_remote_branch = "<remote_branch>"
 endif
 if !exists("g:vvcs_exclude_patterns")
    let g:vvcs_exclude_patterns = ['*.[ao]', '*.class', '.cmake.state', '*.swp', 
@@ -51,7 +54,16 @@ function! vvcs#handlePath(path) " {{{1
       call vvcs#error("invalid path: '".ret."'")
       return ''
    endif
-   let ret = escape(fnameescape(ret), '\') " adapt for ms-windows paths
+   if exists('+shellslash')
+      " adapt for ms-windows paths
+      if !&shellslash
+         set shellslash!
+         " change backslashes to slashes in path separator
+         let ret = expand(ret)
+         set shellslash!
+      endif
+   endif
+   let ret = escape(fnameescape(ret), '\')
    return ret
 endfunction
 
@@ -70,7 +82,7 @@ function! vvcs#rsyncExcludePat() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    let ret = ''
    for pat in g:vvcs_exclude_patterns
-      let ret .= '--exclude \"' . pat . '\" '
+      let ret .= '--exclude "' . pat . '" '
    endfor
    return ret
 endfunction
@@ -84,13 +96,17 @@ endfunction
 let g:vvcs#op = { 
    \'up' : {
          \'args' : ['<path>'],
-         \'cmd': "/usr/bin/rsync -azv ".vvcs#rsyncExcludePat()." -e ssh ".
-            \ g:vvcs_local_host.":<path> ".g:vvcs_remote_mark."<path>",
+         \'cmd': "rsync -azv ".vvcs#rsyncExcludePat()." <path> -e ssh ".
+         \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.'/'.
+         \ g:vvcs_remote_mark."<path>",
+         \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>'],
-         \'cmd': "/usr/bin/rsync -azv ".vvcs#rsyncExcludePat()." -e ssh ".
-            \ g:vvcs_remote_mark."<path> ".g:vvcs_local_host.":<path> ",
+         \'cmd': "rsync -azv ".vvcs#rsyncExcludePat()." -e ssh ".
+         \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.'/'.
+         \ g:vvcs_remote_mark."<path> <path>",
+         \'localCommand' : '',
    \},
    \'pred' : {
          \'args' : ['<filepath>'],
@@ -157,8 +173,11 @@ function! vvcs#execute(key, keepRes, ...) " {{{1
       let cmd = substitute(cmd, par, val, 'g')
    endfor
 
-   exe (a:keepRes ?'caddexp' : 'cgetexpr').' "Will execute: '.cmd.'"'
-   let systemOut = VvcsSystem(printf(g:vvcs_remote_cmd, cmd))
+   exe (a:keepRes ?'caddexp' : 'cgetexpr').' ''Will execute: '.cmd."'"
+   if !has_key(g:vvcs#op[a:key], 'localCommand')
+      let cmd = printf(g:vvcs_remote_cmd, cmd)
+   endif
+   let systemOut = VvcsSystem(cmd)
    if !has_key(g:vvcs#op[a:key], 'inlineResult')
       " caddexp printf(g:vvcs_remote_cmd, cmd)
       caddexp systemOut
