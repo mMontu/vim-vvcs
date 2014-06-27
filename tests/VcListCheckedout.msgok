@@ -1,0 +1,65 @@
+
+>> Check windows after opening
+echo window 1:
+
+/"Previous Version".*/
+nodiff
+readWrite.h previous contents
+echo window 2:
+
+/"AuxFiles[\\/]readWrite.h".*/
+nodiff
+<empty file>
+echo window 3:
+
+/"CodeReview:".*/
+nodiff
+# Changes staged for commit:
+ 
+# Changes not staged for commit:
+AuxFiles/readWrite.h@@/main/myBranch/1
+AuxFiles/checkoutOk.h@@/main/myBranch/4
+
+
+>> Mark one file as 'staged to commit'
+
+echo window 3:
+
+/"CodeReview:".*/
+nodiff
+# Changes staged for commit:
+AuxFiles/checkoutOk.h@@/main/myBranch/4 comment: commmitMsg
+ 
+# Changes not staged for commit:
+AuxFiles/readWrite.h@@/main/myBranch/1
+ 
+>> Mark the other file as 'staged to commit'
+
+echo window 3:
+
+/"CodeReview:".*/
+nodiff
+# Changes staged for commit:
+AuxFiles/checkoutOk.h@@/main/myBranch/4 comment: commmitMsg
+AuxFiles/readWrite.h@@/main/myBranch/1  comment: commmitMsg
+ 
+# Changes not staged for commit:
+
+>> Move back one file to 'not staged to commit'
+
+echo window 3:
+
+/"CodeReview:".*/
+nodiff
+# Changes staged for commit:
+AuxFiles/readWrite.h@@/main/myBranch/1  comment: commmitMsg
+ 
+# Changes not staged for commit:
+AuxFiles/checkoutOk.h@@/main/myBranch/4
+
+>> Commit selected files
+
+/.*Checked in "/AuxFiles/readWrite.h" version "/main/myBranch/2"./
+
+
+Quit comparison?

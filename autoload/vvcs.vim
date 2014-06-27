@@ -117,7 +117,7 @@ let g:vvcs#op = {
    \},
    \'checkout' : {
          \'args' : ['<path>'],
-         \'cmd': "ct co -nc ".g:vvcs_remote_mark."<path>",
+         \'cmd': "ct co -unreserved -nc ".g:vvcs_remote_mark."<path>",
    \},
    \'commit' : {
          \'args' : ['<path>', '<comment>'],
@@ -594,7 +594,7 @@ function! vvcs#commitList() " {{{1
    let startStaged = search(s:VVCS_STAGED_MARKER, 'w')
    let startNotStaged = search(s:VVCS_NOT_STAGED_MARKER, 'w')
    let lines = getline(startStaged+1, startNotStaged-1)
-   call filter(lines, 'v:val =~ "\S"') " remove blank lines
+   call filter(lines, 'v:val =~ ''\S''') " remove blank lines
    call map(lines, 'substitute(v:val, ''^\s\+\|\s\+$'', "", "g")') " trim
    for line in lines
       let piece = split(line, '\s*'.s:VVCS_COMMIT_MSG_MARKER.'\s*') 

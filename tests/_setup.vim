@@ -18,7 +18,11 @@ function! EchoAllWindows()
       exec i.'wincmd w'
       exec "normal \<c-g>"
       set diff?
-      g/^/
+      if line('$') > 1 || getline(1) != ''
+         g/^/
+      else
+         echomsg '<empty file>'
+      endif
    endfor
 endfunction
 
@@ -44,7 +48,9 @@ let s:systemStub = {
          \  "main.c(1146)",
    \},
    \'\<cat\>.*cleartool descr -pred': {
-         \'readOnly.h' : 'readOnly.h previous contents',
+         \'readOnly.h': 'readOnly.h previous contents',
+         \'readWrite.h': 'readWrite.h previous contents',
+         \'checkoutOk.h': 'checkoutOk.h previous contents',
          \'invalidDir.h': 'cleartool: Error: Unable to access '.
          \   '"/AuxFiles/invalidDir.h": No such file or directory.',
    \},
@@ -71,6 +77,10 @@ let s:systemStub = {
          \  'find checked out version for "/AuxFiles/readOnly.h".',
          \'invalidDir.h': 'cleartool: Error: Element name not found: '.
          \  '"/AuxFiles/invalidDir.h".',
+   \},
+   \'\<ct lsco -avobs -cview\>' : {
+         \'.': "AuxFiles/readWrite.h@@/main/myBranch/1\n".
+         \  "AuxFiles/checkoutOk.h@@/main/myBranch/4\n",
    \},
 \}
 
