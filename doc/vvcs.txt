@@ -174,12 +174,28 @@ between the local and remote machine. Default: >
 ==============================================================================
 INPUT FORMATS                                             *vvcs-input-formats*
 
-TODO - input files for code review
+VcCodeReview ~
+
+|:VcCodeReview| command asks for a file containg list of files to compare. It
+should contain a pair of files per line, separated by a semicolon: >
+
+   /myPath/myFile.h@@/main/myBranch/1 ; /myPath/myFile.h@@/main/myBranch/2
+<
+
+It is also possible to provide only one version of the file: >
+   /myPath/myFile.h@@/main/myBranch/1
+<
+
+VVCS will compare the provided version against the latest version. It is
+equivalent to the following: >
+   /myPath/myFile.h@@/main/myBranch/1 ; /myPath/myFile.h@@/main/myBranch/LATEST
+<
 
 ==============================================================================
 EXTENDING                                                 *vvcs-extending*
 
-TODO
+TODO - describe how to extended VVCS to create additional commands
+TODO - describe how to extended VVCS to another Version Control Systems
 
 ==============================================================================
 ABOUT                                                           *vvcs-about*
