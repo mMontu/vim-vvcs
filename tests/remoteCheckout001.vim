@@ -1,28 +1,28 @@
 " Test 'checkout' remote command 
 
 echomsg '>> Test successful invocation'
-call vvcs#execute('checkout', 0, 'AuxFiles/readOnly.h')
+call vvcs#remote#execute('checkout', 0, 'AuxFiles/readOnly.h')
 " echo the contents of the log
 copen
 g/^/
 
 echomsg '>> Test on already checkedout file'
-call vvcs#execute('checkout', 0, 'AuxFiles/readWrite.h')
+call vvcs#remote#execute('checkout', 0, 'AuxFiles/readWrite.h')
 " echo the contents of the log
 copen
 g/^/
 
 echomsg '>> Test failure due to invalid local path'
-call vvcs#execute('checkout', 0, 'AuxFiles/xyz')
+call vvcs#remote#execute('checkout', 0, 'AuxFiles/xyz')
 
 echomsg '>> Test failure due to invalid remote path'
-call vvcs#execute('checkout', 0,  'AuxFiles/invalidDir.h')
+call vvcs#remote#execute('checkout', 0,  'AuxFiles/invalidDir.h')
 " echo the contents of the log
 copen
 g/^/
 
 echomsg '>> Test failure due to ssh error'
-call vvcs#execute('checkout', 0, 'AuxFiles/sshError.h')
+call vvcs#remote#execute('checkout', 0, 'AuxFiles/sshError.h')
 " echo the contents of the log
 copen
 g/^/

@@ -3,7 +3,7 @@
 
 >>> contents of first window
 
-/"\[Scratch]".*/
+/"OLD readOnly.h".*/
   diff
 readOnly.h previous contents
 >>> contents of second window

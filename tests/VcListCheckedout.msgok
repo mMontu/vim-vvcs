@@ -2,8 +2,8 @@
 >> Check windows after opening
 echo window 1:
 
-/"Previous Version".*/
-nodiff
+/"OLD readWrite.h".*/
+  diff
 readWrite.h previous contents
 echo window 2:
 
@@ -14,11 +14,12 @@ echo window 3:
 
 /"CodeReview:".*/
 nodiff
+
 # Changes staged for commit:
  
 # Changes not staged for commit:
-AuxFiles/readWrite.h@@/main/myBranch/1
-AuxFiles/checkoutOk.h@@/main/myBranch/4
+AuxFiles/readWrite.h
+AuxFiles/checkoutOk.h
 
 
 >> Mark one file as 'staged to commit'
@@ -27,11 +28,12 @@ echo window 3:
 
 /"CodeReview:".*/
 nodiff
+
 # Changes staged for commit:
-AuxFiles/checkoutOk.h@@/main/myBranch/4 comment: commmitMsg
+AuxFiles/checkoutOk.h   comment: commmitMsg
  
 # Changes not staged for commit:
-AuxFiles/readWrite.h@@/main/myBranch/1
+AuxFiles/readWrite.h
  
 >> Mark the other file as 'staged to commit'
 
@@ -39,9 +41,10 @@ echo window 3:
 
 /"CodeReview:".*/
 nodiff
+
 # Changes staged for commit:
-AuxFiles/checkoutOk.h@@/main/myBranch/4 comment: commmitMsg
-AuxFiles/readWrite.h@@/main/myBranch/1  comment: commmitMsg
+AuxFiles/checkoutOk.h   comment: commmitMsg
+AuxFiles/readWrite.h    comment: commmitMsg
  
 # Changes not staged for commit:
 
@@ -51,11 +54,12 @@ echo window 3:
 
 /"CodeReview:".*/
 nodiff
+
 # Changes staged for commit:
-AuxFiles/readWrite.h@@/main/myBranch/1  comment: commmitMsg
+AuxFiles/readWrite.h    comment: commmitMsg
  
 # Changes not staged for commit:
-AuxFiles/checkoutOk.h@@/main/myBranch/4
+AuxFiles/checkoutOk.h
 
 >> Commit selected files
 

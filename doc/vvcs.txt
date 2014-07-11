@@ -176,7 +176,7 @@ INPUT FORMATS                                             *vvcs-input-formats*
 
 VcCodeReview ~
 
-|:VcCodeReview| command asks for a file containg list of files to compare. It
+|:VcCodeReview| command asks for a file containing list of files to compare. It
 should contain a pair of files per line, separated by a semicolon: >
 
    /myPath/myFile.h@@/main/myBranch/1 ; /myPath/myFile.h@@/main/myBranch/2
@@ -185,17 +185,16 @@ should contain a pair of files per line, separated by a semicolon: >
 It is also possible to provide only one version of the file: >
    /myPath/myFile.h@@/main/myBranch/1
 <
-
-VVCS will compare the provided version against the latest version. It is
+VVCS will compare the provided version against the previous version. It is
 equivalent to the following: >
-   /myPath/myFile.h@@/main/myBranch/1 ; /myPath/myFile.h@@/main/myBranch/LATEST
+   /myPath/myFile.h@@/main/myBranch/0 ; /myPath/myFile.h@@/main/myBranch/1
 <
 
 ==============================================================================
 EXTENDING                                                 *vvcs-extending*
 
 TODO - describe how to extended VVCS to create additional commands
-TODO - describe how to extended VVCS to another Version Control Systems
+TODO - describe how to extended VVCS to another Version Control System
 
 ==============================================================================
 ABOUT                                                           *vvcs-about*

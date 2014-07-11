@@ -19,7 +19,7 @@ normal /checkout-
 call EchoAllWindows()
 
 echomsg '>> Commit selected files'
-normal \cc
+normal cc
 copen
 g/^/
 cclose

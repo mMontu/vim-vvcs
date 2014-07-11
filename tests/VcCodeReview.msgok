@@ -6,20 +6,20 @@ echo window 1:
 
 /"OLD AuxFiles[\\/]readOnly.h".*/
   diff
-AuxFiles/readOnly.h@@/main/myBranch/1 contents
+AuxFiles/readOnly.h@@/main/myBranch/0 contents
 
 echo window 2:
 
 /"NEW AuxFiles[\\/]readOnly.h".*/
   diff
-/AuxFiles[\\/]readOnly.h@@/main/myBranch/LATEST contents/
+AuxFiles/readOnly.h@@/main/myBranch/1 contents
 
 echo window 3:
 
 /"CodeReview: AuxFiles[\\/]ReviewList1".*/
 nodiff
  
-AuxFiles/readOnly.h@@/main/myBranch/1 ; AuxFiles/readOnly.h@@/main/myBranch/LATEST
+AuxFiles/readOnly.h@@/main/myBranch/0 ; AuxFiles/readOnly.h@@/main/myBranch/1
 
 
 Quit comparison?
@@ -53,19 +53,53 @@ echo window 1:
 
 /"OLD AuxFiles[\\/]newFile.h".*/
 nodiff
+<empty file>
 
 echo window 2:
 
 /"NEW AuxFiles[\\/]newFile.h".*/
 nodiff
-AuxFiles/newFile.h@@/main/myBranch/LATEST contents
+AuxFiles/newFile.h@@/main/myBranch/1 contents
 
 echo window 3:
 
 /"CodeReview: AuxFiles[\\/]ReviewList3".*/
 nodiff
-AuxFiles/newFile.h@@/main/myBranch/0 ; AuxFiles/newFile.h@@/main/myBranch/LATEST
+
+AuxFiles/newFile.h@@/main/myBranch/0 ; AuxFiles/newFile.h@@/main/myBranch/1
+
+Quit comparison?
+
+>> Test successful invocation 4
+
+echo window 1:
+
+/"OLD AuxFiles[\\/]readOnly.h".*/
+  diff
+AuxFiles/readOnly.h@@/main/myBranch/19 contents
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]readOnly.h".*/
+  diff
+AuxFiles/readOnly.h@@/main/myBranch/20 contents
+
+echo window 3:
+
+/"CodeReview: AuxFiles[\\/]ReviewList5".*/
+nodiff
+ 
+AuxFiles/readOnly.h@@/main/myBranch/19;AuxFiles/readOnly.h@@/main/myBranch/20
+
 
 Quit comparison?
 
 
+>> Test invalid input 1
+
+[vvcs plugin] invalid line on review list: "AuxFiles/newFile.h@@/main/myBranch/0"
+
+echo window 1:
+
+nodiff
+<empty file>
