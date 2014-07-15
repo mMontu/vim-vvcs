@@ -55,7 +55,7 @@ let s:systemStub = {
          \   '"/AuxFiles/invalidDir.h": No such file or directory.',
    \},
    \'\<cat\> \S*@@\S*$': {
-         \'readOnly.h' : "%s contents\n\n",
+         \'readOnly.h\|readWrite.h' : "%s contents\n\n",
          \'newFile\.h\S\+\/[^0]\+$' : "%s contents\n\n",
          \'newFile\.h\S\+\/0[^\/]*$' : "",
    \},
@@ -79,8 +79,8 @@ let s:systemStub = {
          \  '"/AuxFiles/invalidDir.h".',
    \},
    \'\<ct lsco -avobs -cview\>' : {
-         \'.': "AuxFiles/readWrite.h@@/main/myBranch/1\n".
-         \  "AuxFiles/checkoutOk.h@@/main/myBranch/4\n",
+         \'.': "15-Jul-2014    user     checkout version \"AuxFiles/readWrite.h\" from /my/branch/1 (unreserved)\n".
+         \     "13-Jul-2014    user     checkout version \"AuxFiles/checkoutOk.h\" from /my/branch/4 (unreserved)\n",
    \},
 \}
 

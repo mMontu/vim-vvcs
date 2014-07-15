@@ -78,7 +78,7 @@ function! vvcs#codeReview() " {{{1
    let lines = readfile(reviewFile)
    " check for lines with single file and format '/path/file@@version/0'
    for elem in lines
-      if elem =~ '\v^[^@;]*\@\@[^ \t@;]+0\s*$'
+      if elem =~ '\v^[^@;]*\@\@[^ \t@;]+<0\s*$'
          call vvcs#log#error('invalid line on review list: "'. elem.'"')
          return
       endif
@@ -112,11 +112,14 @@ function! vvcs#listCheckedOut() " {{{1
 " Display diff of currently checkouted files and its predecessors
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+   let files = split(vvcs#remote#execute('checkedoutList', 0), '\n')
+   let files = map(files, 
+            \ 'substitute(v:val, ''\v.*"([^"]{-})".*'', ''\1'', ''g'')')
    let fileList = "\n".s:VVCS_STAGED_MARKER."\n\n"
    let fileList .= s:VVCS_NOT_STAGED_MARKER."\n"
-   let fileList .= substitute(vvcs#remote#execute('checkedoutList', 0), 
-            \ '@.\{-}\ze\n', '', 'g')
-   let fileList .= "\n"
+   let fileList .= join(files, "\n")
+   let fileList .= "\n\n"
+
    call vvcs#comparison#create(split(fileList, '\n'))
    if vvcs#comparison#switchToListWindow()
       nnoremap <buffer> <silent> - :call vvcs#toggleStaged()<CR>
@@ -139,17 +142,20 @@ function! vvcs#toggleStaged() " {{{1
    " check current state of the file - expects that staged files appears at
    " the beginning, followed by not staged files
    let startNotStaged = search(s:VVCS_NOT_STAGED_MARKER, 'bW')
+   " echom 'startNotStaged = '.startNotStaged
    if startNotStaged != 0
       let commitMsg = VvcsInput("Commit message: ", "")
       if commitMsg =~ '\S'
          let lastStaged = search('\S', 'bW')
+         " echom 'lastStaged = '.lastStaged
          exe cLine.'move '.lastStaged
          exe "normal! A\t".s:VVCS_COMMIT_MSG_MARKER.' '.commitMsg
          let cLine += 1    " made the cursor end on the next not staged file
       endif
    else
       $ " move to end of file
-      let lastNotStaged = search('\S', 'bW')
+      let lastNotStaged = search('\S', 'bWc')
+      " echom 'lastNotStaged = '.lastNotStaged
       exe cLine.'move '.lastNotStaged
       call setline('.', substitute(getline('.'), '\s*'.
                \ s:VVCS_COMMIT_MSG_MARKER.'.*', '', ''))
