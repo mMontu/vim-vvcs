@@ -55,9 +55,9 @@ let s:systemStub = {
          \   '"/AuxFiles/invalidDir.h": No such file or directory.',
    \},
    \'\<cat\> \S*@@\S*$': {
-         \'readOnly.h\|readWrite.h' : "%s contents\n\n",
-         \'newFile\.h\S\+\/[^0]\+$' : "%s contents\n\n",
-         \'newFile\.h\S\+\/0[^\/]*$' : "",
+         \'readOnly\.h\>\|readWrite\.h\>\|checkoutOk\.h\>' : "%s contents\n\n",
+         \'newFile\.h\S\+\/[^0]\d*$' : "%s contents\n\n",
+         \'newFile\.h\S\+\/0\>$' : "",
    \},
    \'\<ct co\>' : {
          \'readOnly.h': 'Checked out "/AuxFiles/readOnly.h" from version '.

@@ -9,13 +9,6 @@ set cpo&vim
 let s:VVCS_CODE_REVIEW_LIST_TITLE = "CodeReview:"
 let s:VVCS_CODE_REVIEW_DIFF_LABEL = ['OLD', 'NEW']
 
-" s:compareFile holds the bufNumber for the 3 comparison windows
-let s:compareFile = [ 
-         \ {'name' : 'first diff'  , 'bufNr' : -1 , 'winNr' : -1},
-         \ {'name' : 'second diff' , 'bufNr' : -1 , 'winNr' : -1},
-         \ {'name' : 'file list'   , 'bufNr' : -1 , 'winNr' : -1},
-\ ]
-
 
 function! vvcs#comparison#create(list) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -43,10 +36,17 @@ function! vvcs#comparison#create(list) " {{{1
    tabe
    vnew
 
+   " t:compareFile holds the bufNumber for the 3 comparison windows
+   let t:compareFile = [ 
+            \ {'name' : 'first diff'  , 'bufNr' : -1 , 'winNr' : -1},
+            \ {'name' : 'second diff' , 'bufNr' : -1 , 'winNr' : -1},
+            \ {'name' : 'file list'   , 'bufNr' : -1 , 'winNr' : -1},
+   \ ]
+
    for i in range(2)
       exe i+1.'wincmd w'
-      let s:compareFile[i].bufNr = bufnr('%')
-      let s:compareFile[i].winNr = winnr()
+      let t:compareFile[i].bufNr = bufnr('%')
+      let t:compareFile[i].winNr = winnr()
       call s:setTempBuffer()
       call s:commonMappings()
    endfor
@@ -57,7 +57,7 @@ function! vvcs#comparison#create(list) " {{{1
       1  " move to the first line
       exe 'silent file '.s:VVCS_CODE_REVIEW_LIST_TITLE
       call s:setTempBuffer()
-      let s:compareFile[2].bufNr = bufnr('%')
+      let t:compareFile[2].bufNr = bufnr('%')
       wincmd J
       setlocal cursorline
       resize 8
@@ -72,7 +72,7 @@ function! vvcs#comparison#create(list) " {{{1
       " trigger the diff on the first line of the list
       call s:compareFiles(0)
    else
-      let s:compareFile[2].bufNr = -1 " TODO: remove when changed to object
+      let t:compareFile[2].bufNr = -1 " TODO: remove when changed to object
       call s:compareItem(a:list[0])
    endif
 endfunction
@@ -87,17 +87,17 @@ function! s:compareFiles(offset) " {{{1
    """"""""""""""""""""""""""""""""""""""""
    "  check if windows are still present  "
    """"""""""""""""""""""""""""""""""""""""
-   for i in range(len(s:compareFile))
-      let s:compareFile[i].winNr = bufwinnr(s:compareFile[i].bufNr)
-      if s:compareFile[i].winNr  == -1
+   for i in range(len(t:compareFile))
+      let t:compareFile[i].winNr = bufwinnr(t:compareFile[i].bufNr)
+      if t:compareFile[i].winNr  == -1
          call vvcs#log#error("missing comparison window: ".
-                  \ s:compareFile[i].name .' ('.s:compareFile[i].bufNr.')')
+                  \ t:compareFile[i].name .' ('.t:compareFile[i].bufNr.')')
          return
       endif
    endfor
-   " echo s:compareFile
+   " echo t:compareFile
    " return
-   exe s:compareFile[2].winNr.'wincmd w'
+   exe t:compareFile[2].winNr.'wincmd w'
    call cursor(line('.') + a:offset, 0)
 
    """""""""""""""""""""""""""""""""
@@ -146,7 +146,7 @@ function! s:compareItem(listItem) " {{{1
 
    " display the files
    for i in range(2)
-      exe s:compareFile[i].winNr.'wincmd w'
+      exe t:compareFile[i].winNr.'wincmd w'
       diffoff
       if &buftype == 'nofile'
          setlocal modifiable
@@ -159,7 +159,7 @@ function! s:compareItem(listItem) " {{{1
       exe 'silent file '.s:VVCS_CODE_REVIEW_DIFF_LABEL[i].'\ '. file[i].name
       exe file[i].cmd
       if &buftype != 'nofile'
-         let s:compareFile[i].bufNr = bufnr('%') " bufNr changes if cmd is edit
+         let t:compareFile[i].bufNr = bufnr('%') " bufNr changes if cmd is edit
       endif
       " trigger autocmd to detect filetype and execute any filetype plugins
       silent doautocmd BufNewFile
@@ -175,17 +175,17 @@ function! s:compareItem(listItem) " {{{1
    """""""""""""""""""""""""""""
    "  jump to the first error  "
    """""""""""""""""""""""""""""
-   exe s:compareFile[0].winNr.'wincmd w'
+   exe t:compareFile[0].winNr.'wincmd w'
    if line('$') > 1 || getline(1) != ''
       normal! gg]c
       " try to avoid some redraw problems
-      exe s:compareFile[1].winNr.'wincmd w'
+      exe t:compareFile[1].winNr.'wincmd w'
       normal! gg]c
       wincmd p
       redraw!
    else
       diffo!
-      exe s:compareFile[1].winNr.'wincmd w'
+      exe t:compareFile[1].winNr.'wincmd w'
    endif
 endfunction
 
@@ -193,11 +193,11 @@ function! vvcs#comparison#switchToListWindow() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Return true if successfully switch to the window use to list compared files
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-      let s:compareFile[2].winNr = bufwinnr(s:compareFile[2].bufNr)
-      if s:compareFile[2].winNr  == -1
+      let t:compareFile[2].winNr = bufwinnr(t:compareFile[2].bufNr)
+      if t:compareFile[2].winNr  == -1
          return 0
       endif
-      exe s:compareFile[2].winNr.'wincmd w'
+      exe t:compareFile[2].winNr.'wincmd w'
       return 1
 endfunction
 

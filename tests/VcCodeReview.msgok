@@ -103,3 +103,97 @@ echo window 1:
 
 nodiff
 <empty file>
+
+>> simultaneous comparisons: 1st
+
+echo window 1:
+
+/"OLD AuxFiles[\\/]readOnly.h".*/
+  diff
+AuxFiles/readOnly.h@@/main/myBranch/55 contents
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]readOnly.h".*/
+  diff
+AuxFiles/readOnly.h@@/main/myBranch/57 contents
+
+echo window 3:
+
+/"CodeReview: AuxFiles[\\/]ReviewList6".*/
+nodiff
+
+AuxFiles/readOnly.h@@/main/myBranch/55 ; AuxFiles/readOnly.h@@/main/myBranch/57
+AuxFiles/newFile.h@@/main/myBranch/2; AuxFiles/newFile.h@@/main/myBranch/10
+
+>> simultaneous comparisons: 2nd
+
+echo window 1:
+
+/"OLD AuxFiles[\\/]readWrite.h".*/
+  diff
+AuxFiles/readWrite.h@@/main/myBranch/39 contents
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]readWrite.h".*/
+  diff
+AuxFiles/readWrite.h@@/main/myBranch/40 contents
+
+echo window 3:
+
+/"CodeReview: AuxFiles[\\/]ReviewList7".*/
+nodiff
+
+AuxFiles/readWrite.h@@/main/myBranch/39 ; AuxFiles/readWrite.h@@/main/myBranch/40
+AuxFiles/checkoutOk.h@@/main/myBranch/60 ; AuxFiles/checkoutOk.h@@/main/myBranch/65
+
+
+>> switching to the next file on 1st comparison
+
+echo window 1:
+
+/"OLD AuxFiles[\\/]newFile.h".*/
+  diff
+AuxFiles/newFile.h@@/main/myBranch/2 contents
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]newFile.h".*/
+  diff
+AuxFiles/newFile.h@@/main/myBranch/10 contents
+
+echo window 3:
+
+/"CodeReview: AuxFiles[\\/]ReviewList6".*/
+nodiff
+
+AuxFiles/readOnly.h@@/main/myBranch/55 ; AuxFiles/readOnly.h@@/main/myBranch/57
+AuxFiles/newFile.h@@/main/myBranch/2; AuxFiles/newFile.h@@/main/myBranch/10
+
+
+
+>> switching to the next file on 2nd comparison
+
+echo window 1:
+
+/"OLD AuxFiles[\\/]checkoutOk.h".*/
+  diff
+AuxFiles/checkoutOk.h@@/main/myBranch/60 contents
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]checkoutOk.h".*/
+  diff
+AuxFiles/checkoutOk.h@@/main/myBranch/65 contents
+
+echo window 3:
+
+/"CodeReview: AuxFiles[\\/]ReviewList7".*/
+nodiff
+
+AuxFiles/readWrite.h@@/main/myBranch/39 ; AuxFiles/readWrite.h@@/main/myBranch/40
+AuxFiles/checkoutOk.h@@/main/myBranch/60 ; AuxFiles/checkoutOk.h@@/main/myBranch/65
+
+
+
