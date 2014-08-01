@@ -1,6 +1,8 @@
 " Test 'VcListCheckedout' command 
 
-set splitright
+let g:vvcs_fix_path = {'pat' : 'AuxFiles', 'sub' : '/vobs'}
+
+" set splitright
 VcListCheckedout
 
 echomsg '>> Check windows after opening'

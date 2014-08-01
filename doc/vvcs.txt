@@ -165,14 +165,20 @@ If it is empty nothing is written. By default it creates a file for each day
 <
 
                                                          *'g:vvcs_fix_path'*
-Use this option to make the project path on the local machine match the
-correspondent path on the remote machine: >
+Most commands expects paths from the local machine (the list supplied to
+VcCodeReview is an exception). This option can be used to map to/from a
+diferent folder on the remote machine: >
 
-   let g:vvcs_fix_path = {'pat' : '^/home/myuser/work', 'sub' : '/vobs/proj1'}
+   let g:vvcs_fix_path = {'pat' : '/home/myuser/work', 'sub' : '/vobs/proj1'}
 <
-This option is used on a |substitute()| call, thus the example above works
-when the contents of the remote folder /vobs/proj1 were copied into ~/work/
-folder of the local machine.
+This option is used on a |substitute()| call, thus the example above can be
+used to work on remote folder /vobs/proj1 mapped on the local folder ~/work.
+
+Some commands are used to build list of files from the remote machine (e.g.:
+list of all checkedout files). For these commands it is necessary to tranform
+the remote path to the localpath. Therefore regular expressions aren't
+supported in g:vvcs_fix_path.
+
 
 
                                                    *'g:vvcs_exclude_patterns'*
@@ -202,6 +208,7 @@ VVCS will compare the provided version against the previous version. It is
 equivalent to the following: >
    /myPath/myFile.h@@/main/myBranch/0 ; /myPath/myFile.h@@/main/myBranch/1
 <
+Notice that the path should be the same as the remote machine.
 
 ==============================================================================
 EXTENDING                                                 *vvcs-extending*

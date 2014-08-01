@@ -86,6 +86,7 @@ let g:vvcs#remote#op = {
          \'args' : [],
          \'cmd':  'ct lsco -avobs -cview',
          \'returnResult' : '',
+         \'fileList' : '',
    \},
 \}
 
@@ -118,9 +119,9 @@ function! vvcs#remote#execute(key, keepRes, ...) " {{{1
             return 1
          endif
          " apply the transformation from local path to the remote filesystem
-         let remPath = substitute(val, g:vvcs_fix_path.pat,
+         let remPath = substitute(val, '^'.g:vvcs_fix_path.pat,
                   \ g:vvcs_fix_path.sub, '')
-         let cmd = substitute(cmd, g:vvcs_remote_mark.par, remPath, 'g')
+         let cmd = substitute(cmd, g:vvcs_remote_mark . par, remPath, 'g')
       endif
       let cmd = substitute(cmd, par, val, 'g')
    endfor
@@ -130,6 +131,14 @@ function! vvcs#remote#execute(key, keepRes, ...) " {{{1
       let cmd = printf(g:vvcs_remote_cmd, cmd)
    endif
    let systemOut = VvcsSystem(cmd)
+   if has_key(g:vvcs#remote#op[a:key], 'fileList')
+      " apply the transformation from remote path to the local filesystem on
+      " each line of the file list received
+      let systemOut = join(
+            \ map(split(systemOut, "\n"), 
+            \ 'substitute(v:val, g:vvcs_fix_path.sub, g:vvcs_fix_path.pat,"")'),
+            \ "\n")
+   endif
    if has_key(g:vvcs#remote#op[a:key], 'inlineResult')
       put =systemOut
       normal! ggdd

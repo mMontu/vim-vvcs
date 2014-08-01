@@ -83,8 +83,8 @@ let s:systemStub = {
          \  '"/AuxFiles/invalidDir.h".',
    \},
    \'\<ct lsco -avobs -cview\>' : {
-         \'.': "15-Jul-2014    user     checkout version \"AuxFiles/readWrite.h\" from /my/branch/1 (unreserved)\n".
-         \     "13-Jul-2014    user     checkout version \"AuxFiles/checkoutOk.h\" from /my/branch/4 (unreserved)\n",
+         \'.': "15-Jul-2014    user     checkout version \"/vobs/readWrite.h\" from /my/branch/1 (unreserved)\n".
+         \     "13-Jul-2014    user     checkout version \"/vobs/checkoutOk.h\" from /my/branch/4 (unreserved)\n",
    \},
 \}
 
