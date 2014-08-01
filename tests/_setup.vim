@@ -13,6 +13,8 @@ function! EchoAllWindows()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " echo the title, diff status and contents of each window
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let startWin = winnr()
+   echomsg '<EchoAllWindows: '.winnr('$').'>'
    for i in range(1, winnr('$'))
       exec 'echomsg "echo window '.i.':"'
       exec i.'wincmd w'
@@ -23,7 +25,9 @@ function! EchoAllWindows()
       else
          echomsg '<empty file>'
       endif
+      echomsg ''
    endfor
+   exe startWin.'wincmd w'
 endfunction
 
 

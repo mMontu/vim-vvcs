@@ -8,10 +8,10 @@ endif
 let g:loaded_vvcs = 1
 
 " Commands {{{1
-command! -complete=file -nargs=? VcUp call vvcs#command('up', <f-args>)
-command! -complete=file -nargs=? VcDown call vvcs#command('down', <f-args>)
-command! -nargs=0 VcDiff call vvcs#comparison#create([expand("%:p")])
-command! -nargs=0 VcCheckout call vvcs#checkout(expand("%:p"))
+command! -bar -complete=file -nargs=? VcUp call vvcs#command('up', <f-args>)
+command! -bar -complete=file -nargs=? VcDown call vvcs#command('down', <f-args>)
+command! -bar -nargs=0 VcDiff call vvcs#comparison#create([expand("%:p")])
+command! -bar -nargs=0 VcCheckout call vvcs#checkout(expand("%:p"))
 command! -nargs=0 VcCodeReview call vvcs#codeReview()
 command! -nargs=0 VcListCheckedout call vvcs#listCheckedOut()
 
@@ -42,7 +42,7 @@ endif
 noremap <unique> <Plug>VcCodeReview :VcCodeReview<CR>
 
 
-" options {{{1
+" Options {{{1
 if !exists("g:vvcs_fix_path")
    let g:vvcs_fix_path = { 'pat' : '', 'sub' : '' }
 endif
@@ -61,13 +61,16 @@ endif
 if !exists("g:vvcs_exclude_patterns")
    let g:vvcs_exclude_patterns = ['*.[ao]', '*.class', '.cmake.state', '*.swp', 
             \ 'core.[0-9][0-9]*', 'lib*.so', 'lib*.so.[0-9]', 'lost+found/',
-            \ '*.jar', '*.gz']
+            \ '*.jar', '*.gz', 'bin/']
 endif
 if !exists("g:vvcs_cache_dir")
    let g:vvcs_cache_dir = $HOME.'/.cache/vvcs'
 endif
 if !exists("g:vvcs_review_comment")
    let g:vvcs_review_comment = "#"
+endif
+if !exists("g:vvcs_log_location")
+   let g:vvcs_log_location = '/log/%Y/%m/%d.log'
 endif
 
 function! VvcsSystem(expr) " {{{1

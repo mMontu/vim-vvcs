@@ -10,11 +10,10 @@ function! vvcs#utils#writeCacheFile(lines, file) " {{{1
 " Write list of lines to file on cache directory (an existing file is
 " overwritten)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   if !isdirectory(g:vvcs_cache_dir)
-      call vvcs#log#error("writeCacheFile(): no cache directory")
-      return
+   let fileName = g:vvcs_cache_dir.'/'.a:file
+   if s:checkDirectory(fileName)
+      silent! call writefile(a:lines, fileName)
    endif
-   silent! call writefile(a:lines, g:vvcs_cache_dir.'/'.a:file)
 endfunction
 
 function! vvcs#utils#readCacheFile(file) " {{{1
@@ -28,6 +27,40 @@ function! vvcs#utils#readCacheFile(file) " {{{1
    return readfile(fileName)
 endfunction
 
+function! vvcs#utils#appendCacheFile(lines, file) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Append lines to file on cache directory
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   call vvcs#utils#writeCacheFile(
+            \ vvcs#utils#readCacheFile(a:file) + a:lines, a:file)
+endfunction
+
+function! vvcs#utils#DisplayCacheFile(file) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Display the cache file
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let fileName = g:vvcs_cache_dir.'/'.a:file
+   if s:checkDirectory(fileName)
+      exe "split ".fileName
+      $  " move to last line
+   endif
+endfunction
+
+function! s:checkDirectory(file) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Return true if the given directory exists or was successfully created
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let dir = fnamemodify(a:file, ":p:h")
+   if !isdirectory(dir)
+      if !exists('*mkdir') || !mkdir(dir, 'p')
+         echohl ErrorMsg
+         echomsg "vvcs plugin: unable to create directory: ".dir
+         echohl None
+         return 0
+      endif
+   endif
+   return 1
+endfunction
 
 
 let &cpo = save_cpo

@@ -12,13 +12,6 @@ let s:VVCS_NOT_STAGED_MARKER = g:vvcs_review_comment.
          \ ' Changes not staged for commit:'
 let s:VVCS_COMMIT_MSG_MARKER = 'comment:'
 
-
-" Initialization {{{1
-if exists('*mkdir') && !isdirectory(g:vvcs_cache_dir)
-   silent! call mkdir(g:vvcs_cache_dir, 'p')
-endif
-
-
 function! vvcs#command(cmd, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " same as vvc#op.execute(), using the current file as optional argument if

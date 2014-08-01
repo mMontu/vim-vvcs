@@ -63,6 +63,7 @@ COMMANDS                                                        *vvcs-commands*
                         current file (|%:p|). This default shall probably
                         change on future versions to the path of the
                         subproject of the current file.
+                        See |:VcUp| for details on the synchronization.
 
                                                                      *:VcDiff*
 :VcDiff                 Open a new tab page displaying the diff between the
@@ -149,6 +150,18 @@ here: http://www.linuxproblem.org/art_9.html
 Set the directory to store the cache files. Default: >
 
    let g:vvcs_cache_dir = $HOME.'/.cache/vvcs'
+<
+
+                                                      *'g:vvcs_log_location'*
+The plugin activity is written to a file, which can be useful if there are any
+problems with the plugin or on the remote VCS (e.g.: a ClearCase VOB is
+corrupted and it is necessary to know which files were commited from a given
+date). 
+The contents of this option is used select the file on the g:vvcs_cache_dir.
+If it is empty nothing is written. By default it creates a file for each day
+(e.g.: on 2014 Jul 22 it would write to ~/.cache/vvcs/log/14/07/22.log): >
+
+   let g:vvcs_log_location = '/log/%Y/%m/%d.log'
 <
 
                                                          *'g:vvcs_fix_path'*

@@ -1,15 +1,18 @@
 
 >> Check windows after opening
+
 echo window 1:
 
 /"OLD readWrite.h".*/
   diff
 readWrite.h previous contents
+
 echo window 2:
 
 /"AuxFiles[\\/]readWrite.h".*/
 nodiff
 <empty file>
+
 echo window 3:
 
 /"CodeReview:".*/

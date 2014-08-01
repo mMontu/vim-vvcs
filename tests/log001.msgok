@@ -1,0 +1,54 @@
+
+>> Log several messages
+[vvcs plugin] Error 1
+[vvcs plugin] Msg 1
+Cmd 1...
+
+<EchoAllWindows: 2>
+echo window 1:
+
+/"AuxFiles[\/]\.cache[\/]vvcs[\/]\+log[\/]\d\+[\/]\d\+[\/]\d\+\.log".*/
+
+nodiff
+/\d\+:\d\+:\d\+: >>> Error <<</
+Error 1
+/\d\+:\d\+:\d\+: >>> Msg <<</
+Msg 1
+/\d\+:\d\+:\d\+: >>> Cmd 1 <<</
+/\d\+:\d\+:\d\+: Cmd log line 1/
+Cmd log line 2
+Cmd log line 3
+
+echo window 2:
+
+"[No Name]" --No lines in buffer--
+nodiff
+<empty file>
+
+>> Clear and display log
+
+<EchoAllWindows: 2>
+echo window 1:
+
+/"AuxFiles/\.cache/vvcs/\+log/\d\+/\d\+/\d\+\.log".*/
+nodiff
+<empty file>
+
+echo window 2:
+
+"[No Name]" --No lines in buffer--
+nodiff
+<empty file>
+
+>> Check that log is disable when vvcs_log_location is empty
+[vvcs plugin] Error 1
+[vvcs plugin] Msg 1
+Cmd 1...
+
+<EchoAllWindows: 1>
+echo window 1:
+
+"[No Name]" --No lines in buffer--
+nodiff
+<empty file>
+
