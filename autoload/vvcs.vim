@@ -17,20 +17,34 @@ function! vvcs#command(cmd, ...) " {{{1
 " same as vvc#op.execute(), using the current file as optional argument if
 " none is available. Requires a single optional argument.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let cmdName = 'Vc'.substitute(a:cmd, '\v(.)', '\U\1', '')
+   call vvcs#log#startCommand(cmdName)
    if a:0 == 1
       call vvcs#remote#execute(a:cmd, 0, a:1)
    else
       call vvcs#remote#execute(a:cmd, 0, expand("%:p"))
    endif
+   redraw
+   call vvcs#log#msg(cmdName.' done')
    checktime  " warn for loaded files changed outside vim
+endfunction
+
+function! vvcs#diff() " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Display diff of current file and it predecessor
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   call vvcs#log#startCommand('VcDiff')
+   call vvcs#comparison#create([expand("%:p")])
 endfunction
 
 function! vvcs#checkout(file) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Checkout and retrieve the specified file
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   call vvcs#log#startCommand('VcCheckout')
    call vvcs#remote#execute('checkout', 0, a:file)
    call vvcs#remote#execute('down', 1, a:file)
+   call vvcs#log#msg('VcCheckout done')
    checktime  " warn for loaded files changed outside vim
 endfunction
 
@@ -38,6 +52,7 @@ function! vvcs#codeReview() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Display diff of a list of files
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   call vvcs#log#startCommand('VcCodeReview')
    """"""""""""""""""""""""
    "  Retrieve file list  "
    """"""""""""""""""""""""
@@ -104,7 +119,7 @@ function! vvcs#listCheckedOut() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Display diff of currently checkouted files and its predecessors
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
+   call vvcs#log#startCommand('VcListCheckedout')
    let files = split(vvcs#remote#execute('checkedoutList', 0), '\n')
    let files = map(files, 
             \ 'substitute(v:val, ''\v.*"([^"]{-})".*'', ''\1'', ''g'')')

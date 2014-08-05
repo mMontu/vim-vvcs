@@ -30,16 +30,19 @@
 >> Test failure due to invalid local path
 
 !.*"AuxFiles[\\/]xyz".*!
-/\[vvcs plugin\] invalid path:.*/
+
+/\[[^]]*\] invalid path:.*/
 
 >> Test failure due to invalid remote path
 
 !.*"AuxFiles[\\/]invalidDir.h".*!
+
 !.*Will execute: .*AuxFiles/invalidDir\.h.*!
 /.*cleartool: Error: Unable to access .*/
 
 >> Test failure due to ssh error
 
 !.*"AuxFiles[\\/]sshError.h".*!
+
 !.*Will execute: .*AuxFiles/sshError\.h.*!
 /.*ssh: \(Could not resolve\|connect to host\).*/

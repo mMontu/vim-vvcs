@@ -9,7 +9,7 @@
 /.*cleartool: Error: Unable to find checked out version for ".*/
 
 >> Test failure due to invalid local path
-/\[vvcs plugin\] invalid path:.*/
+/\[[^]]*\] invalid path:.*/
 
 >> Test failure due to invalid remote path
 /.*Will execute.*/

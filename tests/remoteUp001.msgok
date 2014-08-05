@@ -7,7 +7,7 @@
 /.*total size is \d\+  speedup is \d\+\.\?\d*/
 
 >> Test failure due to invalid local path
-/\[vvcs plugin\] invalid path:.*/
+/\[[^]]*\] invalid path:.*/
 
 
 >> Test failure due to invalid remote path

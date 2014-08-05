@@ -1,13 +1,13 @@
 
 >> Log several messages
-[vvcs plugin] Error 1
-[vvcs plugin] Msg 1
-Cmd 1...
+[vvcs] Error 1
+[vvcs] Msg 1
+[vvcs] Cmd 1...
 
 <EchoAllWindows: 2>
 echo window 1:
 
-/"AuxFiles[\/]\.cache[\/]vvcs[\/]\+log[\/]\d\+[\/]\d\+[\/]\d\+\.log".*/
+/"AuxFiles[/\\]\.cache[/\\]vvcs[/\\]\+log[/\\]\d\+[/\\]\d\+[/\\]\d\+\.log".*/
 
 nodiff
 /\d\+:\d\+:\d\+: >>> Error <<</
@@ -30,7 +30,7 @@ nodiff
 <EchoAllWindows: 2>
 echo window 1:
 
-/"AuxFiles/\.cache/vvcs/\+log/\d\+/\d\+/\d\+\.log".*/
+/"AuxFiles[/\\]\.cache[/\\]vvcs[/\\]\+log[/\\]\d\+[/\\]\d\+[/\\]\d\+\.log".*/
 nodiff
 <empty file>
 
@@ -41,9 +41,9 @@ nodiff
 <empty file>
 
 >> Check that log is disable when vvcs_log_location is empty
-[vvcs plugin] Error 1
-[vvcs plugin] Msg 1
-Cmd 1...
+[vvcs] Error 1
+[vvcs] Msg 1
+[vvcs] Cmd 1...
 
 <EchoAllWindows: 1>
 echo window 1:

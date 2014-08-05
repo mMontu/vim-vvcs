@@ -1,5 +1,6 @@
 
 >> Test successful invocation without arguments
+
 !.*Will execute: .*AuxFiles/readWrite\.h -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/readWrite\.h.*!
 || receiving file list ... done
 
@@ -7,6 +8,7 @@
 /.*total size is \d\+  speedup is \d\+\.\?\d*/
 
 >> Test successful invocation with arguments
+
 !.*Will execute: .*AuxFiles/readOnly\.h -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/readOnly\.h.*!
 || receiving file list ... done
 
@@ -14,13 +16,16 @@
 /.*total size is \d\+  speedup is \d\+\.\?\d*/
 
 >> Test failure due to invalid local path
-/\[vvcs plugin\] invalid path:.*/
+
+/\[[^]]*\] invalid path:.*/
 
 >> Test failure due to invalid remote path
+
 !.*Will execute: .*AuxFiles/invalidDir\.h.*!
 || receiving file list ... done
 /.*rsync: .* failed: No such file or directory.*/
 
 >> Test failure due to ssh error
+
 !.*Will execute: .*AuxFiles/sshError\.h.*!
 /.*ssh: \(Could not resolve\|connect to host\).*/

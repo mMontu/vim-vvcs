@@ -127,6 +127,7 @@ function! vvcs#remote#execute(key, keepRes, ...) " {{{1
    endfor
 
    exe (a:keepRes ?'caddexp' : 'cgetexpr').' ''Will execute: '.cmd."'"
+   call vvcs#log#append(["'Will execute: ".cmd."'"])
    if !has_key(g:vvcs#remote#op[a:key], 'localCommand')
       let cmd = printf(g:vvcs_remote_cmd, cmd)
    endif
@@ -143,8 +144,10 @@ function! vvcs#remote#execute(key, keepRes, ...) " {{{1
       put =systemOut
       normal! ggdd
    elseif has_key(g:vvcs#remote#op[a:key], 'returnResult')
+      call vvcs#log#append(split(systemOut, "\n"))
       return systemOut
    else
+      call vvcs#log#append(split(systemOut, "\n"))
       " caddexp printf(g:vvcs_remote_cmd, cmd)
       caddexp systemOut
       if exists('g:vvcs_debug')

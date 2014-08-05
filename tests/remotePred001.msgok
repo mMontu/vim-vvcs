@@ -5,7 +5,7 @@
 readOnly.h previous contents
 
 >> Test failure due to invalid local path
-/\[vvcs plugin\] invalid path:.*/
+/\[[^]]*\] invalid path:.*/
 
 /E749.*/
 
