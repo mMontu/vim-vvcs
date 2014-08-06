@@ -53,19 +53,31 @@ function! vvcs#comparison#create(list) " {{{1
 
    if len(a:list) > 1
       new
-      put =a:list
+      silent put =a:list
       1  " move to the first line
+      let t:compareFile[2].bufNr = bufnr('%')
+      """"""""""""""""""""""""""
+      "  list window settings  "
+      """"""""""""""""""""""""""
       exe 'silent file '.s:VVCS_CODE_REVIEW_LIST_TITLE
       call s:setTempBuffer()
-      let t:compareFile[2].bufNr = bufnr('%')
       wincmd J
       setlocal cursorline
       resize 8
       setlocal winfixheight
-      call s:commonMappings()
       " highlight filenames
       match SpecialKey /^.\{-}[/\\]\zs[^/\\]\+\ze@@/
       setlocal nowrap
+      " 'expandtab' is not useful on this window, and can cause problems. 
+      " E.g.: when s:VVCS_COMMIT_MSG_MARKER (used by VcListCheckedout)
+      " contains \t it will expand to spaces when the comment is inserted,
+      " thus this variable won't match the inserted text on a substitute()
+      " used to remove comments.
+      setlocal noexpandtab
+      """""""""""""""""""""""""""
+      "  list window  mappings  "
+      """""""""""""""""""""""""""
+      call s:commonMappings()
       nnoremap <buffer> <silent> <CR> :call <SID>compareFiles(0)<CR>
       " map D to the same function on fugitive plugin
       nnoremap <buffer> <silent> D :call <SID>compareFiles(0)<CR>

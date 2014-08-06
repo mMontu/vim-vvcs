@@ -61,7 +61,7 @@ endif
 if !exists("g:vvcs_exclude_patterns")
    let g:vvcs_exclude_patterns = ['*.[ao]', '*.class', '.cmake.state', '*.swp', 
             \ 'core.[0-9][0-9]*', 'lib*.so', 'lib*.so.[0-9]', 'lost+found/',
-            \ '*.jar', '*.gz', 'bin/']
+            \ '*.jar', '*.gz', 'bin/', '*.gdb']
 endif
 if !exists("g:vvcs_cache_dir")
    let g:vvcs_cache_dir = $HOME.'/.cache/vvcs'

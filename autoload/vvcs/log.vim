@@ -42,7 +42,7 @@ function! vvcs#log#append(lines) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " append lines along timestamp to the log
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   if !empty(g:vvcs_log_location)
+   if !empty(g:vvcs_log_location) && !empty(a:lines)
       if g:vvcs_log_location =~ '%d'
          let time = strftime('%H:%M:%S')
       else
@@ -60,7 +60,8 @@ function! vvcs#log#open() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    if !empty(g:vvcs_log_location)
       call vvcs#utils#DisplayCacheFile(expand(strftime(g:vvcs_log_location)))
-      setl nomodifiable
+      setlocal nomodifiable
+      setlocal autoread
       match Directory />>>.*<<</
       2match LineNr /^\d\+:\d\+:\d\+:/
       nnoremap <silent> <buffer> q :q<CR>

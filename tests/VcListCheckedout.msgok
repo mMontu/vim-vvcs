@@ -35,7 +35,7 @@ checkoutOk.h previous contents
 
 echo window 2:
 
-"AuxFiles/checkoutOk.h" line 1 of 1 --100%-- col 1
+/"AuxFiles[\\/]checkoutOk\.h" line 1 of 1.*/
   diff
 checkoutOk.h contents
 
@@ -58,7 +58,7 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-AuxFiles/checkoutOk.h                   #comment: commmitMsg
+/AuxFiles\/checkoutOk\.h.*commmitMsg/
  
 # Changes not staged for commit:
 AuxFiles/readWrite.h
@@ -71,8 +71,8 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-AuxFiles/checkoutOk.h                   #comment: commmitMsg
-AuxFiles/readWrite.h                    #comment: commmitMsg
+/AuxFiles/checkoutOk\.h.*commmitMsg/
+/AuxFiles/readWrite\.h.*commmitMsg/
  
 # Changes not staged for commit:
 
@@ -84,7 +84,7 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-AuxFiles/readWrite.h                    #comment: commmitMsg
+/AuxFiles/readWrite\.h.*commmitMsg/
  
 # Changes not staged for commit:
 AuxFiles/checkoutOk.h
@@ -110,13 +110,14 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-AuxFiles/readWrite.h                    #comment: commmitMsg
+/AuxFiles/readWrite\.h.*commmitMsg/
  
 # Changes not staged for commit:
 AuxFiles/checkoutOk.h
 
 >> Commit selected files
 
+/.*Will execute: ct ci -c \\"commmitMsg\\" .*\/AuxFiles\/readWrite\.h.*/
 /.*Checked in "/AuxFiles/readWrite.h" version "/main/myBranch/2"./
 
 
