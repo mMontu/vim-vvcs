@@ -5,6 +5,7 @@
 let save_cpo = &cpo   " allow line continuation
 set cpo&vim
 
+" constants {{{1
 let s:PLUGIN_TAG = '[vvcs] '
 
 function! vvcs#log#error(msg) " {{{1

@@ -24,6 +24,31 @@ nodiff
 AuxFiles/readWrite.h
 AuxFiles/checkoutOk.h
 
+>> Check diff on the second file
+
+<EchoAllWindows: 3>
+echo window 1:
+
+"OLD checkoutOk.h"  line 1 of 1 --100%-- col 1
+  diff
+checkoutOk.h previous contents
+
+echo window 2:
+
+"AuxFiles/checkoutOk.h" line 1 of 1 --100%-- col 1
+  diff
+checkoutOk.h contents
+
+echo window 3:
+
+"CodeReview:"  line 6 of 7 --85%-- col 10
+nodiff
+ 
+# Changes staged for commit:
+ 
+# Changes not staged for commit:
+AuxFiles/readWrite.h
+AuxFiles/checkoutOk.h
 
 >> Mark one file as 'staged to commit'
 
@@ -33,7 +58,7 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-AuxFiles/checkoutOk.h   comment: commmitMsg
+AuxFiles/checkoutOk.h                   #comment: commmitMsg
  
 # Changes not staged for commit:
 AuxFiles/readWrite.h
@@ -46,8 +71,8 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-AuxFiles/checkoutOk.h   comment: commmitMsg
-AuxFiles/readWrite.h    comment: commmitMsg
+AuxFiles/checkoutOk.h                   #comment: commmitMsg
+AuxFiles/readWrite.h                    #comment: commmitMsg
  
 # Changes not staged for commit:
 
@@ -59,7 +84,33 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-AuxFiles/readWrite.h    comment: commmitMsg
+AuxFiles/readWrite.h                    #comment: commmitMsg
+ 
+# Changes not staged for commit:
+AuxFiles/checkoutOk.h
+
+
+>> Diff stagged file
+
+echo window 1:
+
+/"OLD readWrite.h".*/
+  diff
+readWrite.h previous contents
+
+echo window 2:
+
+/"AuxFiles[\\/]readWrite.h".*/
+nodiff
+<empty file>
+
+echo window 3:
+
+/"CodeReview:".*/
+nodiff
+
+# Changes staged for commit:
+AuxFiles/readWrite.h                    #comment: commmitMsg
  
 # Changes not staged for commit:
 AuxFiles/checkoutOk.h

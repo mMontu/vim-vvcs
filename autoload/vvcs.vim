@@ -10,7 +10,7 @@ let s:VVCS_CODE_REVIEW_BROWSE = "codeReviewBrowse" " cache file name
 let s:VVCS_STAGED_MARKER = g:vvcs_review_comment.' Changes staged for commit:'
 let s:VVCS_NOT_STAGED_MARKER = g:vvcs_review_comment.
          \ ' Changes not staged for commit:'
-let s:VVCS_COMMIT_MSG_MARKER = 'comment:'
+let s:VVCS_COMMIT_MSG_MARKER = "\t\t".g:vvcs_review_comment.'comment:'
 
 function! vvcs#command(cmd, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

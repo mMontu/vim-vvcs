@@ -67,6 +67,8 @@ function! vvcs#comparison#create(list) " {{{1
       match SpecialKey /^.\{-}[/\\]\zs[^/\\]\+\ze@@/
       setlocal nowrap
       nnoremap <buffer> <silent> <CR> :call <SID>compareFiles(0)<CR>
+      " map D to the same function on fugitive plugin
+      nnoremap <buffer> <silent> D :call <SID>compareFiles(0)<CR>
       nnoremap <buffer> <silent> J :call <SID>compareFiles(1)<CR>
       nnoremap <buffer> <silent> K :call <SID>compareFiles(-1)<CR>
       " trigger the diff on the first line of the list
@@ -111,9 +113,9 @@ function! s:compareFiles(offset) " {{{1
       call cursor(line('.') + (a:offset >= 0 ? 1 : -1), 0)
    endw
    redraw  " avoid that cursor move outside window
-   return s:compareItem(getline('.'))
+   let files = substitute(getline('.'), '\s*'.g:vvcs_review_comment.'.*','','')
+   return s:compareItem(files)
 endfunction
-
 
 function! s:compareItem(listItem) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -126,6 +128,7 @@ function! s:compareItem(listItem) " {{{1
    \ ]
    if a:listItem !~ ';'
       " single file specified
+      call vvcs#log#msg('retrieving previous version of '.a:listItem.' ...')
       let file[0].cmd = "call vvcs#remote#execute('pred', 0, '".
                \ a:listItem."')"
       let file[0].name = fnamemodify(a:listItem, ":t")
@@ -139,6 +142,10 @@ function! s:compareItem(listItem) " {{{1
       endif
       for i in range(len(splitItem))
          let file[i].name = substitute(splitItem[i], '@.*','','')
+         " TODO use a custom remote command instead of -cInlineResult and move
+         " both 'retrieving' messages from this method to g:vvcs#remote#op
+         " 'message' key
+         call vvcs#log#msg('retrieving '.splitItem[i].' ...')
          let file[i].cmd = 'call vvcs#remote#execute("-cInlineResult", i, '.
                   \ '"cat ".splitItem[i])'
       endfor
