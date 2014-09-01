@@ -1,19 +1,27 @@
 
 >> Test successful invocation
+
 /.*Will execute.*/
+
 /.*Checked out .* from version .*/
 
 >> Test on already checkedout file
+
 /.*Will execute.*/
+
 /.*cleartool: Error: Element .* is already checked out to view .*/
 
 >> Test failure due to invalid local path
 /\[[^]]*\] invalid path:.*/
 
 >> Test failure due to invalid remote path
+
 /.*Will execute.*/
+
 /.*cleartool: Error: Unable to access .*/
 
 >> Test failure due to ssh error
+
 /.*Will execute.*/
+
 /.*ssh: \(Could not resolve\|connect to host\).*/

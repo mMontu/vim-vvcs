@@ -3,8 +3,11 @@
 !.*"AuxFiles[\\/]checkoutOk.h".*!
 
 !.*Will execute: .*AuxFiles/checkoutOk\.h.*!
+
 !.*Checked out .*AuxFiles/checkoutOk\.h.* from version .*!
+
 !.*Will execute: .* -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/checkoutOk\.h .*AuxFiles/checkoutOk\.h.*!
+
 !.*receiving file list ... done\(\(failed\)\@!\_.\)\{-}sent \d\+ bytes  received \d\+ bytes  \d\+\.\?\d* bytes\/sec!
 /.*total size is \d\+  speedup is \d\+\.\?\d*/
 
@@ -12,6 +15,7 @@
 !.*"AuxFiles[\\/]readWrite.h".*!
 
 !.*Will execute: .*AuxFiles/readWrite\.h.*!
+
 /.*cleartool: Error: Element .* is already checked out to view .*/
 
 >> Test failure due to VcDown failure
@@ -19,9 +23,12 @@
 !.*"AuxFiles[\\/]readOnly.h".*!
 
 !.*Will execute: .*AuxFiles/readOnly\.h.*!
+
 !.*Checked out .*AuxFiles/readOnly\.h.* from version .*!
+
 !.*Will execute: .* -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/readOnly\.h .*AuxFiles/readOnly\.h.*!
-|| receiving file list ... done
+
+/.*receiving file list ... done.*/
 /.*rsync: .* failed: Read-only file system.*/
 
 /.*sent \d\+ bytes  received \d\+ bytes  \d\+\.\?\d* bytes\/sec/
@@ -38,11 +45,11 @@
 !.*"AuxFiles[\\/]invalidDir.h".*!
 
 !.*Will execute: .*AuxFiles/invalidDir\.h.*!
+
 /.*cleartool: Error: Unable to access .*/
 
 >> Test failure due to ssh error
 
 !.*"AuxFiles[\\/]sshError.h".*!
 
-!.*Will execute: .*AuxFiles/sshError\.h.*!
 /.*ssh: \(Could not resolve\|connect to host\).*/

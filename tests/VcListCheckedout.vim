@@ -30,11 +30,11 @@ normal /readWrite
 call EchoAllWindows()
 
 echomsg '>> Commit selected files'
+call vvcs#log#clear()
 call vvcs#comparison#switchToListWindow()
 normal cc
-copen
-g/^/
-cclose
+" check the contents of the log
+call vvcs#log#open()
+call EchoAllWindows()
 
-normal q
 call vimtest#Quit()

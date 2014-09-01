@@ -1,12 +1,13 @@
 >> Test successful invocation
 !.*"AuxFiles[\\/]readOnly.h".*!
 
->>> contents of first window
+echo window 2:
 
 /"OLD readOnly.h".*/
   diff
 readOnly.h previous contents
->>> contents of second window
+
+echo window 3:
 
 /"AuxFiles[\\/]readOnly.h".*/
   diff
@@ -15,10 +16,8 @@ readOnly.h contents
 >> Test failure due to invalid remote path
 !.*"AuxFiles[\\/]invalidDir.h".*!
 
->>> contents of first window
-  diff
-cleartool: Error: Unable to access "/AuxFiles/invalidDir.h": No such file or directory.
->>> contents of second window
+/.*cleartool: Error: Unable to access "/AuxFiles/invalidDir\.h": No such file or directory\./
+
   diff
 invalidDir.h contents
 

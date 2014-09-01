@@ -10,12 +10,14 @@ let s:PLUGIN_TAG = '[vvcs] '
 
 function! vvcs#log#error(msg) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Output an error message to display and log file
+" Output an error message to display and log file. Return the formmatted error
+" message, which can be used on a throw statement.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    echohl ErrorMsg
    echomsg s:PLUGIN_TAG.a:msg
    echohl None
    call vvcs#log#append(['>>> Error <<<', a:msg])
+   return s:PLUGIN_TAG.a:msg
 endfunction
 
 function! vvcs#log#msg(msg) " {{{1
@@ -58,8 +60,8 @@ function! vvcs#log#open() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Display the log file
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   if !empty(g:vvcs_log_location)
-      call vvcs#utils#DisplayCacheFile(expand(strftime(g:vvcs_log_location)))
+   if !empty(g:vvcs_log_location) && 
+            \ vvcs#utils#DisplayCacheFile(expand(strftime(g:vvcs_log_location)))
       setlocal nomodifiable
       setlocal autoread
       match Directory />>>.*<<</

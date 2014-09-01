@@ -1,4 +1,3 @@
-
 >> Check windows after opening
 
 echo window 1:
@@ -120,5 +119,3 @@ AuxFiles/checkoutOk.h
 /.*Will execute: ct ci -c \\"commmitMsg\\" .*\/AuxFiles\/readWrite\.h.*/
 /.*Checked in "/AuxFiles/readWrite.h" version "/main/myBranch/2"./
 
-
-Quit comparison?

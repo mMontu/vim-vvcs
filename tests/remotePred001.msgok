@@ -1,20 +1,15 @@
 
 >> Test successful invocation
 
-/.*Will execute.*/
 readOnly.h previous contents
 
 >> Test failure due to invalid local path
 /\[[^]]*\] invalid path:.*/
 
-/E749.*/
-
 >> Test failure due to invalid remote path
 
-/.*Will execute.*/
-/cleartool: Error: Unable to access .*/
+/.*cleartool: Error: Unable to access .*/
 
 >> Test failure due to ssh error
 
-/.*Will execute.*/
 /.*ssh: \(Could not resolve\|connect to host\).*/

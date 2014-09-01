@@ -77,8 +77,12 @@ function! VvcsSystem(expr) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Wrapper for system() calls. Needed in order to intercept during the tests.
 " It is on this file in order to avoid early loading of autoload during tests.
+" Variable g:VvcsSystemShellError is the replacement for v:shell_error.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   return system(a:expr)
+   let ret = system(a:expr)
+   let g:VvcsSystemShellError = v:shell_error
+   " echom "v:shell_error = ". v:shell_error
+   return ret
 endfunction
 
 function! VvcsInput(...) " {{{1

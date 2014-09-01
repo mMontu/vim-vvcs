@@ -37,13 +37,24 @@ endfunction
 
 function! vvcs#utils#DisplayCacheFile(file) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Display the cache file
+" Display the cache file. If it is already displayed in the current tabpage it
+" is reloaded.
+"
+" Return true when opened the file (and it wasn't already present in current
+" tabpage)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    let fileName = g:vvcs_cache_dir.'/'.a:file
-   if s:checkDirectory(fileName)
-      exe "split ".fileName
+   let winNr = bufwinnr(fileName)
+   if winNr != -1
+      exe winNr.'wincmd w'
+      silent edit
       $  " move to last line
+   elseif s:checkDirectory(fileName)
+      exe "silent split ".fileName
+      $  " move to last line
+      return 1
    endif
+   return 0
 endfunction
 
 function! s:checkDirectory(file) " {{{1

@@ -101,16 +101,9 @@ function! s:compareFiles(offset) " {{{1
    """"""""""""""""""""""""""""""""""""""""
    "  check if windows are still present  "
    """"""""""""""""""""""""""""""""""""""""
-   for i in range(len(t:compareFile))
-      let t:compareFile[i].winNr = bufwinnr(t:compareFile[i].bufNr)
-      if t:compareFile[i].winNr  == -1
-         call vvcs#log#error("missing comparison window: ".
-                  \ t:compareFile[i].name .' ('.t:compareFile[i].bufNr.')')
-         return
-      endif
-   endfor
-   " echo t:compareFile
-   " return
+   if !s:updateWindowNumbers()
+      return
+   endif
    exe t:compareFile[2].winNr.'wincmd w'
    call cursor(line('.') + a:offset, 0)
 
@@ -141,8 +134,7 @@ function! s:compareItem(listItem) " {{{1
    if a:listItem !~ ';'
       " single file specified
       call vvcs#log#msg('retrieving previous version of '.a:listItem.' ...')
-      let file[0].cmd = "call vvcs#remote#execute('pred', 0, '".
-               \ a:listItem."')"
+      let file[0].cmd = "call vvcs#remote#execute('pred', '". a:listItem."')"
       let file[0].name = fnamemodify(a:listItem, ":t")
       let file[1].cmd = 'edit '.a:listItem
    else
@@ -158,7 +150,7 @@ function! s:compareItem(listItem) " {{{1
          " both 'retrieving' messages from this method to g:vvcs#remote#op
          " 'message' key
          call vvcs#log#msg('retrieving '.splitItem[i].' ...')
-         let file[i].cmd = 'call vvcs#remote#execute("-cInlineResult", i, '.
+         let file[i].cmd = 'call vvcs#remote#execute("-cInlineResult", '.
                   \ '"cat ".splitItem[i])'
       endfor
    endif
@@ -189,6 +181,10 @@ function! s:compareItem(listItem) " {{{1
       if &buftype == 'nofile'
          setlocal nomodifiable
       endif
+      " avoid hidding the log file if file[i].cmd fails
+      if !s:updateWindowNumbers()
+         return
+      endif
    endfor
 
    """""""""""""""""""""""""""""
@@ -196,12 +192,15 @@ function! s:compareItem(listItem) " {{{1
    """""""""""""""""""""""""""""
    exe t:compareFile[0].winNr.'wincmd w'
    if line('$') > 1 || getline(1) != ''
-      normal! gg]c
+      normal! gg
+      redraw
+      normal! ]c
+      " redraw
       " try to avoid some redraw problems
-      exe t:compareFile[1].winNr.'wincmd w'
-      normal! gg]c
-      wincmd p
-      redraw!
+      " exe t:compareFile[1].winNr.'wincmd w'
+      " normal! gg]c
+      " wincmd p
+      " redraw!
    else
       diffo!
       exe t:compareFile[1].winNr.'wincmd w'
@@ -236,7 +235,6 @@ function! s:commonMappings() " {{{1
    nnoremap <buffer> <silent> <leader>k :call <SID>compareFiles(-1)<CR>
 endfunction
 
-let &cpo = save_cpo
 
 function! s:setTempBuffer() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -250,4 +248,26 @@ function! s:setTempBuffer() " {{{1
 endfunction
 
 
+function! s:updateWindowNumbers() " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Update the window number for the comparison buffers.
+" Returns false if some window is not found.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+   """"""""""""""""""""""""""""""""""""""""
+   "  check if windows are still present  "
+   """"""""""""""""""""""""""""""""""""""""
+   for i in range(len(t:compareFile))
+      let t:compareFile[i].winNr = bufwinnr(t:compareFile[i].bufNr)
+      if t:compareFile[i].bufNr != -1 && t:compareFile[i].winNr  == -1
+         call vvcs#log#error("missing comparison window: ".
+                  \ t:compareFile[i].name .' ('.t:compareFile[i].bufNr.')')
+         return 0
+      endif
+   endfor
+   " echo t:compareFile
+   return 1
+endfunction
+
+let &cpo = save_cpo
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :

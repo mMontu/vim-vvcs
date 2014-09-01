@@ -89,9 +89,11 @@ let s:systemStub = {
 \}
 
 function! VvcsSystem(expr)
+   let g:VvcsSystemShellError = 0
    let remoteCmd = substitute(a:expr, matchstr(g:vvcs_remote_cmd, 
             \ '.\{-}\ze[''"]*%s'), '', '')
-   if  remoteCmd =~ 'sshError\.h'
+   if  remoteCmd =~# 'sshError\.h'
+      let g:VvcsSystemShellError = 1
       return 'ssh: Could not resolve hostname xyzabc: Name or '.
                \  'service not known'
    endif
@@ -99,6 +101,9 @@ function! VvcsSystem(expr)
       if match(remoteCmd, cmd) != -1
          for key in keys(s:systemStub[cmd])
             if match(remoteCmd, key) != -1
+               if s:systemStub[cmd][key] =~? '\<Error\>\|\<Fail'
+                  let g:VvcsSystemShellError = 1
+               endif
                if match(s:systemStub[cmd][key], '%s') != -1
                   return substitute(s:systemStub[cmd][key], '%s', 
                            \ split(remoteCmd)[1], '')
@@ -109,6 +114,7 @@ function! VvcsSystem(expr)
          endfor
       endif
    endfor
+   let g:VvcsSystemShellError = 1
    return "VvcsSystem: no stub for '".a:expr."' (remoteCmd = ".remoteCmd.")"
 endfunction
 

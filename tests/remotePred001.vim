@@ -1,37 +1,25 @@
 " Test 'pred' remote command 
 
 echomsg '>> Test successful invocation'
-call vvcs#remote#execute('pred', 0, 'AuxFiles/readOnly.h')
-" echo the contents of the log
-copen
-g/^/
-" echo the contents of main windows
-wincmd p
-g/^/
+call vvcs#log#clear()
+call vvcs#remote#execute('pred', 'AuxFiles/readOnly.h')
+" check the contents of the log
+call vvcs#log#open()
+call EchoAllWindows()
 
 echomsg '>> Test failure due to invalid local path'
-g/^/d
-call vvcs#remote#execute('pred', 0, 'AuxFiles/xyz')
-" echo the contents of main windows - should be empty
-g/^/
+call vvcs#remote#execute('pred', 'AuxFiles/xyz')
 
 echomsg '>> Test failure due to invalid remote path'
-call vvcs#remote#execute('pred', 0,  'AuxFiles/invalidDir.h')
-" echo the contents of the log
-copen
-g/^/
-" echo the contents of main windows
-wincmd p
-g/^/
+call vvcs#log#clear()
+call vvcs#remote#execute('pred',  'AuxFiles/invalidDir.h')
+" check the contents of the log
+call EchoAllWindows()
 
 echomsg '>> Test failure due to ssh error'
-call vvcs#remote#execute('pred', 0, 'AuxFiles/sshError.h')
-" echo the contents of the log
-copen
-g/^/
-" echo the contents of main windows
-wincmd p
-g/^/
+call vvcs#remote#execute('pred', 'AuxFiles/sshError.h')
+" check the contents of the log
+call EchoAllWindows()
 
 
 call vimtest#Quit()

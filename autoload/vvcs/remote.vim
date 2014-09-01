@@ -91,20 +91,22 @@ let g:vvcs#remote#op = {
 \}
 
 
-function! vvcs#remote#execute(key, keepRes, ...) " {{{1
+function! vvcs#remote#execute(key, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Run the command on the g:vvcs#remote#op dict for the specified key. The
-" quickfix is filled with the log of the execution. If keepRes is not set the
-" quickfix is cleared before start logging.
+" Run the command on the g:vvcs#remote#op dict for the specified key. 
+"
+" Returns a dictionary (ret), where ret['error'] contains the error message
+" and ret['value'] contains valid information iff empty(ret['error']).
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let ret = {'error' : '', 'value' : ''}
    if !has_key(g:vvcs#remote#op, a:key)
-      call vvcs#log#error('unknown command: ' . a:key)
-      return 1
+      let ret['error'] = vvcs#log#error('unknown command: ' . a:key)
+      return ret
    endif
    if a:0 != len(g:vvcs#remote#op[a:key].args)
-      call vvcs#log#error("incorrect number of parameters for '".a:key.
-               \ "': ".string(a:000))
-      return 1
+      let ret['error'] = vvcs#log#error("incorrect number of parameters for '".
+               \ a:key."': ".string(a:000))
+      return ret
    endif
 
    let cmd = g:vvcs#remote#op[a:key].cmd
@@ -113,11 +115,12 @@ function! vvcs#remote#execute(key, keepRes, ...) " {{{1
       let val = a:000[i]
       if par =~# 'path'
          let val = s:handlePath(val)
+         if val == ''
+            let ret['error'] = 's:handlePath error'
+            return ret
+         endif
          " duplicate escapes as the substitute() below will remove them
          let val = escape(val, '\') 
-         if val == ''
-            return 1
-         endif
          " apply the transformation from local path to the remote filesystem
          let remPath = substitute(val, '^'.g:vvcs_fix_path.pat,
                   \ g:vvcs_fix_path.sub, '')
@@ -126,7 +129,6 @@ function! vvcs#remote#execute(key, keepRes, ...) " {{{1
       let cmd = substitute(cmd, par, val, 'g')
    endfor
 
-   exe (a:keepRes ?'caddexp' : 'cgetexpr').' ''Will execute: '.cmd."'"
    call vvcs#log#append(["'Will execute: ".cmd."'"])
    if !has_key(g:vvcs#remote#op[a:key], 'localCommand')
       let cmd = printf(g:vvcs_remote_cmd, cmd)
@@ -140,21 +142,22 @@ function! vvcs#remote#execute(key, keepRes, ...) " {{{1
             \ 'substitute(v:val, g:vvcs_fix_path.sub, g:vvcs_fix_path.pat,"")'),
             \ "\n")
    endif
+   if g:VvcsSystemShellError
+      let ret['error'] = vvcs#log#error("Failed to execute '".a:key."' ("
+               \ .g:VvcsSystemShellError.")")
+      call vvcs#log#append(split(systemOut, "\n"))
+      call vvcs#log#open()
+      return ret
+   elseif !has_key(g:vvcs#remote#op[a:key], 'inlineResult')
+      call vvcs#log#append(split(systemOut, "\n"))
+   endif
+   let ret['value'] = systemOut
+
    if has_key(g:vvcs#remote#op[a:key], 'inlineResult')
       put =systemOut
       normal! ggdd
-   elseif has_key(g:vvcs#remote#op[a:key], 'returnResult')
-      call vvcs#log#append(split(systemOut, "\n"))
-      return systemOut
-   else
-      call vvcs#log#append(split(systemOut, "\n"))
-      " caddexp printf(g:vvcs_remote_cmd, cmd)
-      caddexp systemOut
-      if exists('g:vvcs_debug')
-         copen
-         wincmd p
-      endif
    endif
+   return ret
 endfunction
 
 

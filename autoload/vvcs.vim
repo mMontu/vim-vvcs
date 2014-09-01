@@ -20,9 +20,12 @@ function! vvcs#command(cmd, ...) " {{{1
    let cmdName = 'Vc'.substitute(a:cmd, '\v(.)', '\U\1', '')
    call vvcs#log#startCommand(cmdName)
    if a:0 == 1
-      call vvcs#remote#execute(a:cmd, 0, a:1)
+      let ret = vvcs#remote#execute(a:cmd, a:1)
    else
-      call vvcs#remote#execute(a:cmd, 0, expand("%:p"))
+      let ret = vvcs#remote#execute(a:cmd, expand("%:p"))
+   endif
+   if !empty(ret['error'])
+      return
    endif
    redraw
    call vvcs#log#msg(cmdName.' done')
@@ -42,8 +45,14 @@ function! vvcs#checkout(file) " {{{1
 " Checkout and retrieve the specified file
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    call vvcs#log#startCommand('VcCheckout')
-   call vvcs#remote#execute('checkout', 0, a:file)
-   call vvcs#remote#execute('down', 1, a:file)
+   let ret = vvcs#remote#execute('checkout', a:file)
+   if !empty(ret['error'])
+      return
+   endif
+   let ret = vvcs#remote#execute('down', a:file)
+   if !empty(ret['error'])
+      return
+   endif
    call vvcs#log#msg('VcCheckout done')
    checktime  " warn for loaded files changed outside vim
 endfunction
@@ -120,7 +129,11 @@ function! vvcs#listCheckedOut() " {{{1
 " Display diff of currently checkouted files and its predecessors
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    call vvcs#log#startCommand('VcListCheckedout')
-   let files = split(vvcs#remote#execute('checkedoutList', 0), '\n')
+   let retCheckedoutL = vvcs#remote#execute('checkedoutList')
+   if !empty(retCheckedoutL['error'])
+      return
+   endif
+   let files = split(retCheckedoutL['value'], '\n')
    let files = map(files, 
             \ 'substitute(v:val, ''\v.*"([^"]{-})".*'', ''\1'', ''g'')')
    let fileList = "\n".s:VVCS_STAGED_MARKER."\n\n"
@@ -193,9 +206,11 @@ function! vvcs#commitList() " {{{1
       " doesn't appear on the list to verify that the commit is being
       " performed on the correct content - notify the user if the file on
       " remote is different
-      call vvcs#remote#execute('commit', 1, filename, piece[1])
+      call vvcs#remote#execute('commit', filename, piece[1])
       " TODO: after implementing error checking execute 'down' as the file may
-      " have changed to 'readonly'
+      " have changed to 'readonly'; also move successfully commited files to
+      " another list, to allow the user to retry the commit after it solves
+      " problems like reserved checkouts by another user
    endfor
 endfunction
 
