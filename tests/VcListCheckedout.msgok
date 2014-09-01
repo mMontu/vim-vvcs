@@ -117,5 +117,6 @@ AuxFiles/checkoutOk.h
 >> Commit selected files
 
 /.*Will execute: ct ci -c \\"commmitMsg\\" .*\/AuxFiles\/readWrite\.h.*/
+
 /.*Checked in "/AuxFiles/readWrite.h" version "/main/myBranch/2"./
 

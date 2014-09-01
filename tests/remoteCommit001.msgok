@@ -2,6 +2,7 @@
 >> Test successful invocation
 
 /.*Will execute.*/
+
 /.*Checked in .*" version ".*/
 
 >> Test on already commited file

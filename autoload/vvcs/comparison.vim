@@ -133,7 +133,6 @@ function! s:compareItem(listItem) " {{{1
    \ ]
    if a:listItem !~ ';'
       " single file specified
-      call vvcs#log#msg('retrieving previous version of '.a:listItem.' ...')
       let file[0].cmd = "call vvcs#remote#execute('pred', '". a:listItem."')"
       let file[0].name = fnamemodify(a:listItem, ":t")
       let file[1].cmd = 'edit '.a:listItem
@@ -146,12 +145,8 @@ function! s:compareItem(listItem) " {{{1
       endif
       for i in range(len(splitItem))
          let file[i].name = substitute(splitItem[i], '@.*','','')
-         " TODO use a custom remote command instead of -cInlineResult and move
-         " both 'retrieving' messages from this method to g:vvcs#remote#op
-         " 'message' key
-         call vvcs#log#msg('retrieving '.splitItem[i].' ...')
-         let file[i].cmd = 'call vvcs#remote#execute("-cInlineResult", '.
-                  \ '"cat ".splitItem[i])'
+         let file[i].cmd = 'call vvcs#remote#execute("catVersion", '.
+                  \ 'splitItem[i])'
       endfor
    endif
 

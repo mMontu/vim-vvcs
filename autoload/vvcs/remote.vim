@@ -64,6 +64,7 @@ let g:vvcs#remote#op = {
             \'<filepath>@@\`cleartool descr -pred -short '.g:vvcs_remote_mark.
             \'<filepath>\`',
          \'inlineResult' : '',
+         \'message' : 'retrieving previous version of <filepath> ...',
    \},
    \'checkout' : {
          \'args' : ['<path>'],
@@ -72,6 +73,18 @@ let g:vvcs#remote#op = {
    \'commit' : {
          \'args' : ['<path>', '<comment>'],
          \'cmd': 'ct ci -c \"<comment>\" '.g:vvcs_remote_mark.'<path>',
+         \'message' : 'committing <path> ...',
+   \},
+   \ 'checkedoutList' : {
+         \'args' : [],
+         \'cmd':  'ct lsco -avobs -cview',
+         \'fileList' : '',
+   \},
+   \'catVersion' : {
+         \'args' : ['<remFile>'],
+         \'cmd': "cat <remFile>",
+         \'inlineResult' : '',
+         \'message' : 'retrieving <remFile> ...',
    \},
    \'-c' : {
          \'args' : ['<cmd>'],
@@ -81,12 +94,6 @@ let g:vvcs#remote#op = {
          \'args' : ['<cmd>'],
          \'cmd': "<cmd>",
          \'inlineResult' : '',
-   \},
-   \ 'checkedoutList' : {
-         \'args' : [],
-         \'cmd':  'ct lsco -avobs -cview',
-         \'returnResult' : '',
-         \'fileList' : '',
    \},
 \}
 
@@ -98,6 +105,9 @@ function! vvcs#remote#execute(key, ...) " {{{1
 " Returns a dictionary (ret), where ret['error'] contains the error message
 " and ret['value'] contains valid information iff empty(ret['error']).
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   """"""""""""""""""""""""""""""""""
+   "  Check for invalid parameters  "
+   """"""""""""""""""""""""""""""""""
    let ret = {'error' : '', 'value' : ''}
    if !has_key(g:vvcs#remote#op, a:key)
       let ret['error'] = vvcs#log#error('unknown command: ' . a:key)
@@ -109,6 +119,12 @@ function! vvcs#remote#execute(key, ...) " {{{1
       return ret
    endif
 
+   """""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   "  Insert paremters on the remote command placeholders  "
+   """""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   if has_key(g:vvcs#remote#op[a:key], 'message')
+      let message = g:vvcs#remote#op[a:key]['message']
+   endif
    let cmd = g:vvcs#remote#op[a:key].cmd
    for i in range(len(g:vvcs#remote#op[a:key].args))
       let par = g:vvcs#remote#op[a:key].args[i]
@@ -127,11 +143,20 @@ function! vvcs#remote#execute(key, ...) " {{{1
          let cmd = substitute(cmd, g:vvcs_remote_mark . par, remPath, 'g')
       endif
       let cmd = substitute(cmd, par, val, 'g')
+      if exists("l:message")
+         let message = substitute(message, par, val, 'g')
+      endif
    endfor
 
+   """"""""""""""""""""""""""""
+   "  Execute remote command  "
+   """"""""""""""""""""""""""""
    call vvcs#log#append(["'Will execute: ".cmd."'"])
    if !has_key(g:vvcs#remote#op[a:key], 'localCommand')
       let cmd = printf(g:vvcs_remote_cmd, cmd)
+   endif
+   if has_key(g:vvcs#remote#op[a:key], 'message')
+      call vvcs#log#msg(message)
    endif
    let systemOut = VvcsSystem(cmd)
    if has_key(g:vvcs#remote#op[a:key], 'fileList')
@@ -142,6 +167,10 @@ function! vvcs#remote#execute(key, ...) " {{{1
             \ 'substitute(v:val, g:vvcs_fix_path.sub, g:vvcs_fix_path.pat,"")'),
             \ "\n")
    endif
+
+   """""""""""""""""""""""
+   "  Check for failure  "
+   """""""""""""""""""""""
    if g:VvcsSystemShellError
       let ret['error'] = vvcs#log#error("Failed to execute '".a:key."' ("
                \ .g:VvcsSystemShellError.")")
@@ -153,6 +182,9 @@ function! vvcs#remote#execute(key, ...) " {{{1
    endif
    let ret['value'] = systemOut
 
+   """""""""""""""""""""""""""
+   "  Handle 'inlineResult'  "
+   """""""""""""""""""""""""""
    if has_key(g:vvcs#remote#op[a:key], 'inlineResult')
       put =systemOut
       normal! ggdd
