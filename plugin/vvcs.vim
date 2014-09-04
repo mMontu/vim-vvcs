@@ -14,6 +14,7 @@ command! -bar -nargs=0 VcDiff call vvcs#diff()
 command! -bar -nargs=0 VcCheckout call vvcs#checkout(expand("%:p"))
 command! -nargs=0 VcCodeReview call vvcs#codeReview()
 command! -nargs=0 VcListCheckedout call vvcs#listCheckedOut()
+command! -nargs=0 VcGetRemotePath call vvcs#getRemotePath()
 
 " Mappings {{{1
 if !hasmapto('<Plug>VcUpdate')
@@ -41,6 +42,10 @@ if !hasmapto('<Plug>VcCodeReview')
 endif
 noremap <unique> <Plug>VcCodeReview :VcCodeReview<CR>
 
+if !hasmapto('<Plug>VcGetRemotePath')
+   map <unique> <leader>vg <Plug>VcGetRemotePath
+endif
+noremap <unique> <Plug>VcGetRemotePath :VcGetRemotePath<CR>
 
 " Options {{{1
 if !exists("g:vvcs_fix_path")

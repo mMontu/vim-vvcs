@@ -74,7 +74,6 @@ COMMANDS                                                        *vvcs-commands*
                         K or <c-up>     jump to previous difference
                         q               end the comparison, close the tab page
 <
-
                                                                   *:VcCheckout*
 :VcCheckout             Perform checkout on the current file.
 
@@ -94,7 +93,6 @@ COMMANDS                                                        *vvcs-commands*
                         J               open diff for the next files
                         K               open diff for the previous files
 <
-
                                                             *:VcListCheckedout*
 :VcListCheckedout       List the checkdout files and allow for diff with the
                         previous version. It behaves similar to |:VcCodeReview|
@@ -105,6 +103,10 @@ COMMANDS                                                        *vvcs-commands*
                                         status'
                         <leader>cc      commit all the files staged for commit
 <
+                                                            *:VcGetRemotePath*
+:VcGetRemotePath        Retrieve remote path of current file, which can be
+                        useful when accessing the remote machine directly
+                        while browsing the code on local machine.
 
 ==============================================================================
 KEY MAPPINGS                                                    *vvcs-mappings*
@@ -116,6 +118,7 @@ By default, vvcs adds the following mappings:
    <leader>vd              <Plug>VcDiff
    <leader>vo              <Plug>VcCheckout
    <leader>vc              <Plug>VcCodeReview
+   <leader>vg              <Plug>VcGetRemotePath
 
 ==============================================================================
 OPTIONS                                                         *vvcs-options*
@@ -167,7 +170,7 @@ If it is empty nothing is written. By default it creates a file for each day
                                                          *'g:vvcs_fix_path'*
 Most commands expects paths from the local machine (the list supplied to
 VcCodeReview is an exception). This option can be used to map to/from a
-diferent folder on the remote machine: >
+different folder on the remote machine: >
 
    let g:vvcs_fix_path = {'pat' : '/home/myuser/work', 'sub' : '/vobs/proj1'}
 <
@@ -175,17 +178,27 @@ This option is used on a |substitute()| call, thus the example above can be
 used to work on remote folder /vobs/proj1 mapped on the local folder ~/work.
 
 Some commands are used to build list of files from the remote machine (e.g.:
-list of all checkedout files). For these commands it is necessary to tranform
-the remote path to the localpath. Therefore regular expressions aren't
+list of all checkedout files). For these commands it is necessary to transform
+the remote path to the local path. Therefore regular expressions aren't
 supported in g:vvcs_fix_path.
 
+Note that some systems uses forward slashes as paths separators, while others
+uses backslashes (e.g.: |dos-backslash|). This plugin doesn't make any
+assumptions about the local system, but assumes that the remote systems uses
+forward slashes. Therefore path separators are converted to forward slashes
+before applying the g:vvcs_fix_path and using it on the remote machine. 
 
+From this follows that g:vvcs_fix_path.pat must *always* use forward slashes.
+Example: in order to convert from 'C:\NewFolder\Project' to '/vobs/proj1': >
+
+   let g:vvcs_fix_path = {'pat' : 'C:/NewFolder/Proj', 'sub' : '/vobs/proj1'}
+<
 
                                                    *'g:vvcs_exclude_patterns'*
 The contents of this option is used to avoid transfer unimportant files
 between the local and remote machine. Default: >
 
-   let g:vvcs_exclude_patterns = ['*.[ao]', '*.class', '.cmake.state', '*.swp', 
+   let g:vvcs_exclude_patterns = ['*.[ao]', '*.class', '.cmake.state', '*.swp',
             \ 'core.[0-9][0-9]*', 'lib*.so', 'lib*.so.[0-9]', 'lost+found/',
             \ '*.jar', '*.gz']
 <

@@ -86,7 +86,7 @@ function! vvcs#comparison#create(list) " {{{1
       " trigger the diff on the first line of the list
       call s:compareFiles(0)
    else
-      let t:compareFile[2].bufNr = -1 " TODO: remove when changed to object
+      let t:compareFile[2].bufNr = -1
       call s:compareItem(a:list[0])
    endif
 endfunction
@@ -188,9 +188,9 @@ function! s:compareItem(listItem) " {{{1
    exe t:compareFile[0].winNr.'wincmd w'
    if line('$') > 1 || getline(1) != ''
       normal! gg
-      redraw
+      redraw!
       normal! ]c
-      " redraw
+      redraw
       " try to avoid some redraw problems
       " exe t:compareFile[1].winNr.'wincmd w'
       " normal! gg]c

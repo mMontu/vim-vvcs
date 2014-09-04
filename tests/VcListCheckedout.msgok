@@ -20,8 +20,8 @@ nodiff
 # Changes staged for commit:
  
 # Changes not staged for commit:
-AuxFiles/readWrite.h
-AuxFiles/checkoutOk.h
+/AuxFiles[\\/]readWrite.h/
+/AuxFiles[\\/]checkoutOk.h/
 
 >> Check diff on the second file
 
@@ -46,8 +46,8 @@ nodiff
 # Changes staged for commit:
  
 # Changes not staged for commit:
-AuxFiles/readWrite.h
-AuxFiles/checkoutOk.h
+/AuxFiles[\\/]readWrite.h/
+/AuxFiles[\\/]checkoutOk.h/
 
 >> Mark one file as 'staged to commit'
 
@@ -57,10 +57,10 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-/AuxFiles\/checkoutOk\.h.*commmitMsg/
+/AuxFiles[\\/]checkoutOk\.h.*commmitMsg/
  
 # Changes not staged for commit:
-AuxFiles/readWrite.h
+/AuxFiles[\\/]readWrite.h/
  
 >> Mark the other file as 'staged to commit'
 
@@ -70,8 +70,8 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-/AuxFiles/checkoutOk\.h.*commmitMsg/
-/AuxFiles/readWrite\.h.*commmitMsg/
+/AuxFiles[\\/]checkoutOk\.h.*commmitMsg/
+/AuxFiles[\\/]readWrite\.h.*commmitMsg/
  
 # Changes not staged for commit:
 
@@ -83,10 +83,10 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-/AuxFiles/readWrite\.h.*commmitMsg/
+/AuxFiles[\\/]readWrite\.h.*commmitMsg/
  
 # Changes not staged for commit:
-AuxFiles/checkoutOk.h
+/AuxFiles[\\/]checkoutOk.h/
 
 
 >> Diff stagged file
@@ -109,10 +109,10 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-/AuxFiles/readWrite\.h.*commmitMsg/
+/AuxFiles[\\/]readWrite\.h.*commmitMsg/
  
 # Changes not staged for commit:
-AuxFiles/checkoutOk.h
+/AuxFiles[\\/]checkoutOk.h/
 
 >> Commit selected files
 

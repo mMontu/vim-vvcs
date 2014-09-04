@@ -133,12 +133,9 @@ function! vvcs#listCheckedOut() " {{{1
    if !empty(retCheckedoutL['error'])
       return
    endif
-   let files = split(retCheckedoutL['value'], '\n')
-   let files = map(files, 
-            \ 'substitute(v:val, ''\v.*"([^"]{-})".*'', ''\1'', ''g'')')
    let fileList = "\n".s:VVCS_STAGED_MARKER."\n\n"
    let fileList .= s:VVCS_NOT_STAGED_MARKER."\n"
-   let fileList .= join(files, "\n")
+   let fileList .= retCheckedoutL['value']
    let fileList .= "\n\n"
 
    call vvcs#comparison#create(split(fileList, '\n'))
@@ -214,6 +211,15 @@ function! vvcs#commitList() " {{{1
    endfor
 endfunction
 
+function! vvcs#getRemotePath() " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Retrieve remote path of current file
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let remPath = vvcs#remote#toRemotePath(expand("%:p"))
+   let @+ = remPath
+   call vvcs#log#msg('VcGetRemotePath: '.remPath)
+
+endfunction
 
 
 let &cpo = save_cpo

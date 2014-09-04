@@ -78,7 +78,8 @@ let g:vvcs#remote#op = {
    \ 'checkedoutList' : {
          \'args' : [],
          \'cmd':  'ct lsco -avobs -cview',
-         \'fileList' : '',
+         \'adjust': 'vvcs#remote#toLocalPath('
+               \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
    \},
    \'catVersion' : {
          \'args' : ['<remFile>'],
@@ -131,15 +132,18 @@ function! vvcs#remote#execute(key, ...) " {{{1
       let val = a:000[i]
       if par =~# 'path'
          let val = s:handlePath(val)
-         if val == ''
+         if empty(val)
             let ret['error'] = 's:handlePath error'
             return ret
          endif
          " duplicate escapes as the substitute() below will remove them
          let val = escape(val, '\') 
          " apply the transformation from local path to the remote filesystem
-         let remPath = substitute(val, '^'.g:vvcs_fix_path.pat,
-                  \ g:vvcs_fix_path.sub, '')
+         let remPath = vvcs#remote#toRemotePath(val)
+         if empty(remPath)
+            let ret['error'] = 'vvcs#remote#toRemotePath error'
+            return ret
+         endif
          let cmd = substitute(cmd, g:vvcs_remote_mark . par, remPath, 'g')
       endif
       let cmd = substitute(cmd, par, val, 'g')
@@ -159,13 +163,9 @@ function! vvcs#remote#execute(key, ...) " {{{1
       call vvcs#log#msg(message)
    endif
    let systemOut = VvcsSystem(cmd)
-   if has_key(g:vvcs#remote#op[a:key], 'fileList')
-      " apply the transformation from remote path to the local filesystem on
-      " each line of the file list received
-      let systemOut = join(
-            \ map(split(systemOut, "\n"), 
-            \ 'substitute(v:val, g:vvcs_fix_path.sub, g:vvcs_fix_path.pat,"")'),
-            \ "\n")
+   if has_key(g:vvcs#remote#op[a:key], 'adjust')
+      let systemOut = join(map(split(systemOut, "\n"), 
+               \ g:vvcs#remote#op[a:key]['adjust']), "\n")
    endif
 
    """""""""""""""""""""""
@@ -192,6 +192,34 @@ function! vvcs#remote#execute(key, ...) " {{{1
    return ret
 endfunction
 
+function! vvcs#remote#toRemotePath(localPath) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Transform from local path to the remote filesystem (which uses forward
+" slashes as path separator).
+" Return empty string for invalid paths.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let remPath = s:handlePath(a:localPath)
+   if !empty(remPath)
+      let remPath = substitute(remPath, '^'.g:vvcs_fix_path.pat,
+                  \ g:vvcs_fix_path.sub, '')
+   endif
+   return remPath
+endfunction
+
+
+function! vvcs#remote#toLocalPath(remotePath) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Transformation from remote path to the local filesystem.
+" Do not check for invalid paths since it is possible that a file exists on
+" the remote filesystem but wasn't copied to the local machine.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let locPath = substitute(a:remotePath, '^'.g:vvcs_fix_path.sub,
+                  \ g:vvcs_fix_path.pat, '')
+   if exists('+shellslash')
+      let locPath = expand(locPath) " change to backslashes if necessary
+   endif
+   return locPath
+endfunction
 
 
 
