@@ -231,6 +231,69 @@ EXTENDING                                                 *vvcs-extending*
 TODO - describe how to extended VVCS to create additional commands
 TODO - describe how to extended VVCS to another Version Control System
 
+VVCS uses a dictionary to store all commands used to communicate with the
+remote system. Each entry on this dictionary is also a dictionary which must
+contain the following keys:
+
+args            its value is a list of named arguments the command expects.
+                Use an empty list if no commands are required. Each item in
+                the list that matches "path" is handled as filename and is
+                expanded to its full path before is is used; when it is
+                immediately preceded by `g:vvcs_remote_mark` it is converted
+                to the equivalent remote path (see |g:vvcs_fix_path|).
+
+cmd             its value is a string containing the command to be executed on
+                the remote machine.
+
+Example: >
+   let g:vvcs#remote#op['checkout'] =  {
+            \'args' : ['<path>'],
+            \'cmd': "ct co -unreserved -nc ".g:vvcs_remote_mark."<path>",
+      \}
+<
+Each command may have a number of optional entries:
+
+localCommand    by default the string in cmd is executed on the remote machine
+                through the expansion in |g:vvcs_remote_cmd|. This key can be
+                used for commands that may run faster directly in the local
+                machine (e.g. 'rsync <local> <remote>' instead of 
+                'ssh <remote> "<setupCmd>; rsync <remote> <local>"'.
+
+message         display its value as a message to the user before executing
+                the command. It may contain elements of the "args" key, which
+                are replaced by the actual arguments in the same way as the
+                "cmd" key.
+
+silent          by default the output of the commands is stored in the log
+                file. This key may be to skip logging the command results,
+                which is useful for commands that retrieve the contents of
+                source files.
+
+adjust          some remote commands requires post-processing in order to
+                provide meaningful results. The value of this entry is used as
+                the second argument of call to |map()|, in order to change all
+                the lines of the result.
+
+Example: >
+   let var['checkedoutList'] =  {
+            \'args' : [],
+            \'cmd':  'ct lsco -avobs -cview',
+            \'message' : 'retrieving list ...',
+            \'adjust': 'vvcs#remote#toLocalPath('
+                  \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
+      \}
+<
+The command 'ct lsco ... ' is used in ClearCase to retrieve the list of file
+currently checked-out; its output is on the following format: >
+
+   27-Aug.14:02 user  checkout version "/path1/myFile" from /vers/3 (unreserved)
+   27-Aug.15:08 user  checkout version "/path2/filex" from /vers/2 (unreserved)
+<
+The result from remote command is split in '\n', then the substitute acts on
+each line of the result (|v:val|) in order to remove the unnecessary
+information, then vvcs#remove#toLocalPath() is used to convert the path to the
+local filesystem (|g:vvcs_fix_path|).
+
 ==============================================================================
 ABOUT                                                           *vvcs-about*
 

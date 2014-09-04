@@ -133,7 +133,9 @@ function! s:compareItem(listItem) " {{{1
    \ ]
    if a:listItem !~ ';'
       " single file specified
-      let file[0].cmd = "call vvcs#remote#execute('pred', '". a:listItem."')"
+      let file[0].cmd = "call setline(1, split(".
+               \ "vvcs#remote#execute('pred', '". a:listItem."')".
+               \ "['value'], '\n'))"
       let file[0].name = fnamemodify(a:listItem, ":t")
       let file[1].cmd = 'edit '.a:listItem
    else
@@ -145,8 +147,9 @@ function! s:compareItem(listItem) " {{{1
       endif
       for i in range(len(splitItem))
          let file[i].name = substitute(splitItem[i], '@.*','','')
-         let file[i].cmd = 'call vvcs#remote#execute("catVersion", '.
-                  \ 'splitItem[i])'
+         let file[i].cmd = "call setline(1, split(".
+                  \ 'vvcs#remote#execute("catVersion", splitItem[i])'.
+                  \ "['value'], '\n'))"
       endfor
    endif
 

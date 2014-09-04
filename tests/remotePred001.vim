@@ -2,7 +2,9 @@
 
 echomsg '>> Test successful invocation'
 call vvcs#log#clear()
-call vvcs#remote#execute('pred', 'AuxFiles/readOnly.h')
+call setline(1, split(
+         \ vvcs#remote#execute('pred', 'AuxFiles/readOnly.h')
+         \['value'], '\n'))
 " check the contents of the log
 call vvcs#log#open()
 call EchoAllWindows()
@@ -17,6 +19,7 @@ call vvcs#remote#execute('pred',  'AuxFiles/invalidDir.h')
 call EchoAllWindows()
 
 echomsg '>> Test failure due to ssh error'
+call vvcs#log#clear()
 call vvcs#remote#execute('pred', 'AuxFiles/sshError.h')
 " check the contents of the log
 call EchoAllWindows()

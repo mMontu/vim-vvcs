@@ -63,7 +63,7 @@ let g:vvcs#remote#op = {
          \'cmd':  'cat '.g:vvcs_remote_mark.
             \'<filepath>@@\`cleartool descr -pred -short '.g:vvcs_remote_mark.
             \'<filepath>\`',
-         \'inlineResult' : '',
+         \'silent' : '',
          \'message' : 'retrieving previous version of <filepath> ...',
    \},
    \'checkout' : {
@@ -78,23 +78,19 @@ let g:vvcs#remote#op = {
    \ 'checkedoutList' : {
          \'args' : [],
          \'cmd':  'ct lsco -avobs -cview',
+         \'message' : 'retrieving list ...',
          \'adjust': 'vvcs#remote#toLocalPath('
                \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
    \},
    \'catVersion' : {
          \'args' : ['<remFile>'],
          \'cmd': "cat <remFile>",
-         \'inlineResult' : '',
+         \'silent' : '',
          \'message' : 'retrieving <remFile> ...',
    \},
    \'-c' : {
          \'args' : ['<cmd>'],
          \'cmd': "<cmd>",
-   \},
-   \'-cInlineResult' : {
-         \'args' : ['<cmd>'],
-         \'cmd': "<cmd>",
-         \'inlineResult' : '',
    \},
 \}
 
@@ -162,9 +158,9 @@ function! vvcs#remote#execute(key, ...) " {{{1
    if has_key(g:vvcs#remote#op[a:key], 'message')
       call vvcs#log#msg(message)
    endif
-   let systemOut = VvcsSystem(cmd)
+   let ret['value'] = VvcsSystem(cmd)
    if has_key(g:vvcs#remote#op[a:key], 'adjust')
-      let systemOut = join(map(split(systemOut, "\n"), 
+      let ret['value'] = join(map(split(ret['value'], "\n"), 
                \ g:vvcs#remote#op[a:key]['adjust']), "\n")
    endif
 
@@ -174,21 +170,13 @@ function! vvcs#remote#execute(key, ...) " {{{1
    if g:VvcsSystemShellError
       let ret['error'] = vvcs#log#error("Failed to execute '".a:key."' ("
                \ .g:VvcsSystemShellError.")")
-      call vvcs#log#append(split(systemOut, "\n"))
+      call vvcs#log#append(split(ret['value'], "\n"))
       call vvcs#log#open()
       return ret
-   elseif !has_key(g:vvcs#remote#op[a:key], 'inlineResult')
-      call vvcs#log#append(split(systemOut, "\n"))
+   elseif !has_key(g:vvcs#remote#op[a:key], 'silent')
+      call vvcs#log#append(split(ret['value'], "\n"))
    endif
-   let ret['value'] = systemOut
 
-   """""""""""""""""""""""""""
-   "  Handle 'inlineResult'  "
-   """""""""""""""""""""""""""
-   if has_key(g:vvcs#remote#op[a:key], 'inlineResult')
-      put =systemOut
-      normal! ggdd
-   endif
    return ret
 endfunction
 
