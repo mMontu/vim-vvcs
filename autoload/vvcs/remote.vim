@@ -46,14 +46,14 @@ endfunction
 let g:vvcs#remote#op = { 
    \'up' : {
          \'args' : ['<path>'],
-         \'cmd': "rsync -azv ".s:rsyncExcludePat()." <path> -e ssh ".
+         \'cmd': "rsync -azvC ".s:rsyncExcludePat()." <path> -e ssh ".
          \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.'/'.
          \ g:vvcs_remote_mark."<path>",
          \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>'],
-         \'cmd': "rsync -azv ".s:rsyncExcludePat()." -e ssh ".
+         \'cmd': "rsync -azvC ".s:rsyncExcludePat()." -e ssh ".
          \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.'/'.
          \ g:vvcs_remote_mark."<path> <path>",
          \'localCommand' : '',

@@ -64,9 +64,8 @@ if !exists("g:vvcs_remote_branch")
    let g:vvcs_remote_branch = "<remote_branch>"
 endif
 if !exists("g:vvcs_exclude_patterns")
-   let g:vvcs_exclude_patterns = ['*.[ao]', '*.class', '.cmake.state', '*.swp', 
-            \ 'core.[0-9][0-9]*', 'lib*.so', 'lib*.so.[0-9]', 'lost+found/',
-            \ '*.jar', '*.gz', 'bin/', '*.gdb']
+   let g:vvcs_exclude_patterns = ['*.class', '.cmake.state', '*.swp', 
+            \ 'core.[0-9][0-9]*', '*.so.[0-9]', 'lost+found/', '*.jar', '*.gz']
 endif
 if !exists("g:vvcs_cache_dir")
    let g:vvcs_cache_dir = $HOME.'/.cache/vvcs'
