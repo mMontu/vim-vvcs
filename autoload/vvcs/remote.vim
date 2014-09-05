@@ -78,7 +78,6 @@ let g:vvcs#remote#op = {
    \ 'checkedoutList' : {
          \'args' : [],
          \'cmd':  'ct lsco -avobs -cview',
-         \'message' : 'retrieving list ...',
          \'adjust': 'vvcs#remote#toLocalPath('
                \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
    \},

@@ -57,7 +57,7 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-/AuxFiles[\\/]checkoutOk\.h.*commmitMsg/
+/AuxFiles[\\/]checkoutOk\.h/
  
 # Changes not staged for commit:
 /AuxFiles[\\/]readWrite.h/
@@ -70,8 +70,8 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-/AuxFiles[\\/]checkoutOk\.h.*commmitMsg/
-/AuxFiles[\\/]readWrite\.h.*commmitMsg/
+/AuxFiles[\\/]checkoutOk\.h/
+/AuxFiles[\\/]readWrite\.h/
  
 # Changes not staged for commit:
 
@@ -83,7 +83,7 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-/AuxFiles[\\/]readWrite\.h.*commmitMsg/
+/AuxFiles[\\/]readWrite\.h/
  
 # Changes not staged for commit:
 /AuxFiles[\\/]checkoutOk.h/
@@ -109,7 +109,7 @@ echo window 3:
 nodiff
 
 # Changes staged for commit:
-/AuxFiles[\\/]readWrite\.h.*commmitMsg/
+/AuxFiles[\\/]readWrite\.h/
  
 # Changes not staged for commit:
 /AuxFiles[\\/]checkoutOk.h/
@@ -120,3 +120,4 @@ nodiff
 
 /.*Checked in "/AuxFiles/readWrite.h" version "/main/myBranch/2"./
 
+/.*Will execute: rsync .*<remote_host>:.*/readWrite\.h .*readWrite\.h.*/

@@ -10,7 +10,6 @@ let s:VVCS_CODE_REVIEW_BROWSE = "codeReviewBrowse" " cache file name
 let s:VVCS_STAGED_MARKER = g:vvcs_review_comment.' Changes staged for commit:'
 let s:VVCS_NOT_STAGED_MARKER = g:vvcs_review_comment.
          \ ' Changes not staged for commit:'
-let s:VVCS_COMMIT_MSG_MARKER = "\t\t".g:vvcs_review_comment.'comment:'
 
 function! vvcs#command(cmd, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -162,21 +161,15 @@ function! vvcs#toggleStaged() " {{{1
    let startNotStaged = search(s:VVCS_NOT_STAGED_MARKER, 'bW')
    " echom 'startNotStaged = '.startNotStaged
    if startNotStaged != 0
-      let commitMsg = VvcsInput("Commit message: ", "")
-      if commitMsg =~ '\S'
-         let lastStaged = search('\S', 'bW')
-         " echom 'lastStaged = '.lastStaged
-         exe cLine.'move '.lastStaged
-         exe "normal! A\t".s:VVCS_COMMIT_MSG_MARKER.' '.commitMsg
-         let cLine += 1    " made the cursor end on the next not staged file
-      endif
+      let lastStaged = search('\S', 'bW')
+      " echom 'lastStaged = '.lastStaged
+      exe cLine.'move '.lastStaged
+      let cLine += 1    " made the cursor end on the next not staged file
    else
       $ " move to end of file
       let lastNotStaged = search('\S', 'bWc')
       " echom 'lastNotStaged = '.lastNotStaged
       exe cLine.'move '.lastNotStaged
-      call setline('.', substitute(getline('.'), '\s*'.
-               \ s:VVCS_COMMIT_MSG_MARKER.'.*', '', ''))
    endif
    setlocal nomodifiable
    " restore cursor position when successful or aborting (no commit msg)
@@ -193,21 +186,27 @@ function! vvcs#commitList() " {{{1
    let startStaged = search(s:VVCS_STAGED_MARKER, 'w')
    let startNotStaged = search(s:VVCS_NOT_STAGED_MARKER, 'w')
    let lines = getline(startStaged+1, startNotStaged-1)
+   let commitMsg = VvcsInput("Commit message: ", "")
+   if commitMsg !~ '\S'
+      return
+   endif
    call filter(lines, 'v:val =~ ''\S''') " remove blank lines
    call map(lines, 'substitute(v:val, ''^\s\+\|\s\+$'', "", "g")') " trim
    for line in lines
-      let piece = split(line, '\s*'.s:VVCS_COMMIT_MSG_MARKER.'\s*') 
-      " remove any version identifier
-      let filename = substitute(piece[0], '@@.*', '', '')
       " TODO: execute 'up' on the containing dir and check that the file
       " doesn't appear on the list to verify that the commit is being
       " performed on the correct content - notify the user if the file on
       " remote is different
-      call vvcs#remote#execute('commit', filename, piece[1])
-      " TODO: after implementing error checking execute 'down' as the file may
-      " have changed to 'readonly'; also move successfully commited files to
-      " another list, to allow the user to retry the commit after it solves
-      " problems like reserved checkouts by another user
+      let ret = vvcs#remote#execute('commit', line, commitMsg)
+      if empty(ret['error'])
+         call vvcs#remote#execute('down', line)
+         checktime  " warn for loaded files changed outside vim
+      else
+         call vvcs#log#error("failed to commit '".line."'")
+      endif
+      " TODO: move successfully commited files to another list, to allow the
+      " user to retry the commit after it solves problems like reserved
+      " checkouts by another user
    endfor
 endfunction
 
