@@ -10,6 +10,7 @@ let s:VVCS_CODE_REVIEW_BROWSE = "codeReviewBrowse" " cache file name
 let s:VVCS_STAGED_MARKER = g:vvcs_review_comment.' Changes staged for commit:'
 let s:VVCS_NOT_STAGED_MARKER = g:vvcs_review_comment.
          \ ' Changes not staged for commit:'
+let s:VVCS_LIST_CHECKEDOUT_FILE = "listCheckedout.review" 
 
 function! vvcs#command(cmd, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -36,7 +37,7 @@ function! vvcs#diff() " {{{1
 " Display diff of current file and it predecessor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    call vvcs#log#startCommand('VcDiff')
-   call vvcs#comparison#create([expand("%:p")])
+   call vvcs#comparison#createSingle(expand("%:p"))
 endfunction
 
 function! vvcs#checkout(file) " {{{1
@@ -61,6 +62,7 @@ function! vvcs#codeReview() " {{{1
 " Display diff of a list of files
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    call vvcs#log#startCommand('VcCodeReview')
+   " TODO: move to utils#browse(prompt, histCacheFile?)
    """"""""""""""""""""""""
    "  Retrieve file list  "
    """"""""""""""""""""""""
@@ -71,6 +73,7 @@ function! vvcs#codeReview() " {{{1
       if exists('b:browsefilter')
          let save_browsefilter = b:browsefilter
       endif
+      " TODO: replace .list with the extension select for syntax highlight
       let b:browsefilter = "All Files\t*\nList Files (*.list)\t*.list\n"
       let reviewFile = browse('', prompt, startDir, '')
       if exists('save_browsefilter')
@@ -88,39 +91,10 @@ function! vvcs#codeReview() " {{{1
    call vvcs#utils#writeCacheFile([fnamemodify(reviewFile, ":p:h")], 
             \ s:VVCS_CODE_REVIEW_BROWSE)
 
-   """""""""""""""""""""""""""
-   "  Check/adapt file list  "
-   """""""""""""""""""""""""""
-   let lines = readfile(reviewFile)
-   " check for lines with single file and format '/path/file@@version/0'
-   for elem in lines
-      if elem =~ '\v^[^@;]*\@\@[^ \t@;]+<0\s*$'
-         call vvcs#log#error('invalid line on review list: "'. elem.'"')
-         return
-      endif
-   endfor
-
-   " Detect lines containing only '/path/file@@version/N' and replace with
-   " '/path/file@@version/N-1 ; /path/file@@version/N' 
-   call map(lines, 'substitute(v:val, '.
-      \ '''\v^(\s*[^ \t;@]+\@\@[^ \t;]{-})(\d+>)\s*$'', '.
-      \ '''\=submatch(1).(submatch(2)-1)." ; ".submatch(1).submatch(2)'', "")')
-
-   """""""""""""""""""""
-   "  Prepare display  "
-   """""""""""""""""""""
-   if len(lines) < 2
-      " ensure that review list is displayed
-      call add(lines, "")
-   endif
-   call vvcs#comparison#create(lines)
-   if vvcs#comparison#switchToListWindow()
-      let cName = bufname('%')
-      exe 'silent file '. cName .'\ '.reviewFile
-   else
-      call vvcs#log#error('codeReview: failed to set review list title')
-      return
-   endif
+   """"""""""""""""""""""""
+   "  display comparison  "
+   """"""""""""""""""""""""
+   call vvcs#comparison#create(reviewFile)
 endfunction
 
 function! vvcs#listCheckedOut() " {{{1
@@ -136,11 +110,14 @@ function! vvcs#listCheckedOut() " {{{1
    let fileList .= s:VVCS_NOT_STAGED_MARKER."\n"
    let fileList .= retCheckedoutL['value']
    let fileList .= "\n\n"
+   let file = vvcs#utils#writeCacheFile(split(fileList, '\n'), 
+            \ s:VVCS_LIST_CHECKEDOUT_FILE)
 
-   call vvcs#comparison#create(split(fileList, '\n'))
+   call vvcs#comparison#create(file)
    if vvcs#comparison#switchToListWindow()
       nnoremap <buffer> <silent> - :call vvcs#toggleStaged()<CR>
       nnoremap <buffer> <silent> cc :call vvcs#commitList()<CR>
+      " TODO: include v? to display help file, similar to fugitive g?
    else
       call vvcs#log#error('listCheckedOut: failed to create mappings')
       return
@@ -217,7 +194,6 @@ function! vvcs#getRemotePath() " {{{1
    let remPath = vvcs#remote#toRemotePath(expand("%:p"))
    let @+ = remPath
    call vvcs#log#msg('VcGetRemotePath: '.remPath)
-
 endfunction
 
 

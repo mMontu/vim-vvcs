@@ -42,6 +42,11 @@ if !hasmapto('<Plug>VcCodeReview')
 endif
 noremap <unique> <Plug>VcCodeReview :VcCodeReview<CR>
 
+if !hasmapto('<Plug>VcListCheckedout')
+   map <unique> <leader>vl <Plug>VcListCheckedout
+endif
+noremap <unique> <Plug>VcListCheckedout :VcListCheckedout<CR>
+
 if !hasmapto('<Plug>VcGetRemotePath')
    map <unique> <leader>vg <Plug>VcGetRemotePath
 endif

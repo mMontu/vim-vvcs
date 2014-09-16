@@ -14,7 +14,7 @@ nodiff
 
 echo window 3:
 
-/"CodeReview:".*/
+/"AuxFiles[\\/]\.cache[\\/]vvcs[\\/].*/
 nodiff
 
 # Changes staged for commit:
@@ -28,8 +28,9 @@ nodiff
 <EchoAllWindows: 3>
 echo window 1:
 
-"OLD checkoutOk.h"  line 1 of 1 --100%-- col 1
+/"OLD checkoutOk.h".*/
   diff
+
 checkoutOk.h previous contents
 
 echo window 2:
@@ -40,7 +41,7 @@ checkoutOk.h contents
 
 echo window 3:
 
-"CodeReview:"  line 6 of 7 --85%-- col 10
+/"AuxFiles[\\/]\.cache[\\/]vvcs[\\/].*/
 nodiff
  
 # Changes staged for commit:
@@ -53,7 +54,7 @@ nodiff
 
 echo window 3:
 
-/"CodeReview:".*/
+/"AuxFiles[\\/]\.cache[\\/]vvcs[\\/].*/
 nodiff
 
 # Changes staged for commit:
@@ -66,7 +67,7 @@ nodiff
 
 echo window 3:
 
-/"CodeReview:".*/
+/"AuxFiles[\\/]\.cache[\\/]vvcs[\\/].*/
 nodiff
 
 # Changes staged for commit:
@@ -79,7 +80,7 @@ nodiff
 
 echo window 3:
 
-/"CodeReview:".*/
+/"AuxFiles[\\/]\.cache[\\/]vvcs[\\/].*/
 nodiff
 
 # Changes staged for commit:
@@ -105,7 +106,7 @@ nodiff
 
 echo window 3:
 
-/"CodeReview:".*/
+/"AuxFiles[\\/]\.cache[\\/]vvcs[\\/].*/
 nodiff
 
 # Changes staged for commit:

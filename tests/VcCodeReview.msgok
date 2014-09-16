@@ -17,10 +17,10 @@ AuxFiles/readOnly.h@@/main/myBranch/1 contents
 
 echo window 3:
 
-/"CodeReview: AuxFiles[\\/]ReviewList1".*/
+/"AuxFiles[\\/]ReviewList1".*/
 nodiff
  
-AuxFiles/readOnly.h@@/main/myBranch/0 ; AuxFiles/readOnly.h@@/main/myBranch/1
+AuxFiles/readOnly.h@@/main/myBranch/1
 
 
 Quit comparison?
@@ -43,7 +43,7 @@ AuxFiles/readOnly.h@@/main/myBranch/2 contents
 
 echo window 3:
 
-/"CodeReview: AuxFiles[\\/]ReviewList2".*/
+/"AuxFiles[\\/]ReviewList2".*/
 nodiff
  
 AuxFiles/readOnly.h@@/main/myBranch/1 ; AuxFiles/readOnly.h@@/main/myBranch/2
@@ -66,10 +66,10 @@ AuxFiles/newFile.h@@/main/myBranch/1 contents
 
 echo window 3:
 
-/"CodeReview: AuxFiles[\\/]ReviewList3".*/
+/"AuxFiles[\\/]ReviewList3".*/
 nodiff
 
-AuxFiles/newFile.h@@/main/myBranch/0 ; AuxFiles/newFile.h@@/main/myBranch/1
+AuxFiles/newFile.h@@/main/myBranch/1
 
 Quit comparison?
 
@@ -89,7 +89,7 @@ AuxFiles/readOnly.h@@/main/myBranch/20 contents
 
 echo window 3:
 
-/"CodeReview: AuxFiles[\\/]ReviewList5".*/
+/"AuxFiles[\\/]ReviewList5".*/
 nodiff
  
 AuxFiles/readOnly.h@@/main/myBranch/19;AuxFiles/readOnly.h@@/main/myBranch/20
@@ -100,12 +100,24 @@ Quit comparison?
 
 >> Test invalid input 1
 
-/\[[^]]*\] invalid line on review list: "AuxFiles/newFile\.h@@/main/myBranch/0"/
-
 echo window 1:
 
+/"OLD AuxFiles[\\/]newFile.h".*/
+  diff
+AuxFiles/newFile.h@@/main/myBranch/-1 contents
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]newFile.h".*/
 nodiff
 <empty file>
+
+echo window 3:
+
+/"AuxFiles[\\/]ReviewList4".*/
+nodiff
+AuxFiles/newFile.h@@/main/myBranch/0
+
 
 >> simultaneous comparisons: 1st
 
@@ -123,7 +135,7 @@ AuxFiles/readOnly.h@@/main/myBranch/57 contents
 
 echo window 3:
 
-/"CodeReview: AuxFiles[\\/]ReviewList6".*/
+/"AuxFiles[\\/]ReviewList6".*/
 nodiff
 
 AuxFiles/readOnly.h@@/main/myBranch/55 ; AuxFiles/readOnly.h@@/main/myBranch/57
@@ -145,10 +157,10 @@ AuxFiles/readWrite.h@@/main/myBranch/40 contents
 
 echo window 3:
 
-/"CodeReview: AuxFiles[\\/]ReviewList7".*/
+/"AuxFiles[\\/]ReviewList7".*/
 nodiff
 
-AuxFiles/readWrite.h@@/main/myBranch/39 ; AuxFiles/readWrite.h@@/main/myBranch/40
+AuxFiles/readWrite.h@@/main/myBranch/40
 AuxFiles/checkoutOk.h@@/main/myBranch/60 ; AuxFiles/checkoutOk.h@@/main/myBranch/65
 
 
@@ -168,7 +180,7 @@ AuxFiles/newFile.h@@/main/myBranch/10 contents
 
 echo window 3:
 
-/"CodeReview: AuxFiles[\\/]ReviewList6".*/
+/"AuxFiles[\\/]ReviewList6".*/
 nodiff
 
 AuxFiles/readOnly.h@@/main/myBranch/55 ; AuxFiles/readOnly.h@@/main/myBranch/57
@@ -192,10 +204,10 @@ AuxFiles/checkoutOk.h@@/main/myBranch/65 contents
 
 echo window 3:
 
-/"CodeReview: AuxFiles[\\/]ReviewList7".*/
+/"AuxFiles[\\/]ReviewList7".*/
 nodiff
 
-AuxFiles/readWrite.h@@/main/myBranch/39 ; AuxFiles/readWrite.h@@/main/myBranch/40
+AuxFiles/readWrite.h@@/main/myBranch/40
 AuxFiles/checkoutOk.h@@/main/myBranch/60 ; AuxFiles/checkoutOk.h@@/main/myBranch/65
 
 

@@ -1,10 +1,10 @@
->> Test successful invocation
-!.*"AuxFiles[\\/]readOnly.h".*!
+>> Test successful invocation (single line)
 
 echo window 2:
 
-/"OLD readOnly.h".*/
+/"OLD readOnly.h"\s*line \d of 1.*/
   diff
+
 readOnly.h previous contents
 
 echo window 3:
@@ -12,6 +12,35 @@ echo window 3:
 /"AuxFiles[\\/]readOnly.h".*/
   diff
 readOnly.h contents
+
+>> Test successful invocation (last line empty)
+
+echo window 2:
+
+/"OLD readWrite.h"\s*line \d of 2.*/
+  diff
+readWrite.h previous contents
+
+echo window 3:
+
+/"AuxFiles[\\/]readWrite.h".*/
+nodiff
+<empty file>
+
+>> Test successful invocation (first line empty)
+
+echo window 2:
+
+/"OLD checkoutOk.h"\s*line \d of 2.*/
+  diff
+
+checkoutOk.h previous contents
+
+echo window 3:
+
+/"AuxFiles[\\/]checkoutOk.h".*/
+  diff
+checkoutOk.h contents
 
 >> Test failure due to invalid remote path
 !.*"AuxFiles[\\/]invalidDir.h".*!

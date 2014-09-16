@@ -52,9 +52,9 @@ let s:systemStub = {
          \  "main.c(1146)",
    \},
    \'\<cat\>.*cleartool descr -pred': {
-         \'readOnly.h': 'readOnly.h previous contents',
-         \'readWrite.h': 'readWrite.h previous contents',
-         \'checkoutOk.h': 'checkoutOk.h previous contents',
+         \'readOnly.h': "readOnly.h previous contents\n",
+         \'readWrite.h': "readWrite.h previous contents\n\n",
+         \'checkoutOk.h': "\ncheckoutOk.h previous contents",
          \'invalidDir.h': 'cleartool: Error: Unable to access '.
          \   '"/AuxFiles/invalidDir.h": No such file or directory.',
    \},

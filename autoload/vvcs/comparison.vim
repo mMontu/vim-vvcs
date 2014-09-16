@@ -6,33 +6,28 @@ let save_cpo = &cpo   " allow line continuation
 set cpo&vim
 
 " constants {{{1
-let s:VVCS_CODE_REVIEW_LIST_TITLE = "CodeReview:"
 let s:VVCS_CODE_REVIEW_DIFF_LABEL = ['OLD', 'NEW']
 
 
-function! vvcs#comparison#create(list) " {{{1
+function! vvcs#comparison#createSingle(files) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Create a new tab and display the diff of the first pair of selected files.
+" Create a new tab with two windows and display the diff of files specified in
+" the string a:files, which can be:
 "
-" \par list    a list of files to be compared. Only used when the first
-"              parameter is an empty string
-"
-" When a:list is contains a single element the listWindow isn't displayed.
-"
-" Each entry on a:list is can be one of the following:
 "  * two filenames separeted by a semi-colon
 "  * a single filename without version specified -- on this case it will be
 "     compared against the previous version based on the current branch/config
 "     spec
-"
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   call s:createDiffWindows()
+   let t:compareFile[2].bufNr = -1
+   call s:compareItem(a:files)
+endfunction
 
-   if type(a:list) != type([]) || len(a:list) == 0
-      call vvcs#log#error('comparison#create(): invalid ''a:list'' (type: '.
-               \ type(a:list).', len = '.len(a:list).')')
-      return 1
-   endif
-
+function! s:createDiffWindows() " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Create a new tab and two windows to display the diff.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    tabe
    vnew
 
@@ -50,45 +45,60 @@ function! vvcs#comparison#create(list) " {{{1
       call s:setTempBuffer()
       call s:commonMappings()
    endfor
+endfunction
 
-   if len(a:list) > 1
-      new
-      silent put =a:list
-      1  " move to the first line
-      let t:compareFile[2].bufNr = bufnr('%')
-      """"""""""""""""""""""""""
-      "  list window settings  "
-      """"""""""""""""""""""""""
-      exe 'silent file '.s:VVCS_CODE_REVIEW_LIST_TITLE
-      call s:setTempBuffer()
-      wincmd J
-      setlocal cursorline
-      resize 8
-      setlocal winfixheight
-      " highlight filenames
-      match SpecialKey /^.\{-}[/\\]\zs[^/\\]\+\ze@@/
-      setlocal nowrap
-      " 'expandtab' is not useful on this window, and can cause problems. 
-      " E.g.: when s:VVCS_COMMIT_MSG_MARKER (used by VcListCheckedout)
-      " contains \t it will expand to spaces when the comment is inserted,
-      " thus this variable won't match the inserted text on a substitute()
-      " used to remove comments.
-      setlocal noexpandtab
-      """""""""""""""""""""""""""
-      "  list window  mappings  "
-      """""""""""""""""""""""""""
-      call s:commonMappings()
-      nnoremap <buffer> <silent> <CR> :call <SID>compareFiles(0)<CR>
-      " map D to the same function on fugitive plugin
-      nnoremap <buffer> <silent> D :call <SID>compareFiles(0)<CR>
-      nnoremap <buffer> <silent> J :call <SID>compareFiles(1)<CR>
-      nnoremap <buffer> <silent> K :call <SID>compareFiles(-1)<CR>
-      " trigger the diff on the first line of the list
-      call s:compareFiles(0)
-   else
-      let t:compareFile[2].bufNr = -1
-      call s:compareItem(a:list[0])
-   endif
+function! vvcs#comparison#create(file) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Create a new tab and display the diff of the first pair of selected files.
+"
+" \par file    file containing the list of files to be compared.
+"
+" Each entry on a:list is can be one of the following:
+"  * two filenames separeted by a semi-colon
+"  * a single filename without version specified -- on this case it will be
+"     compared against the previous version based on the current branch/config
+"     spec
+"
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+   call s:createDiffWindows()
+
+   """""""""""""""""""""""""""""
+   "  open review list window  "
+   """""""""""""""""""""""""""""
+   new
+   exe 'silent edit '.a:file
+   1  " move to the first line
+   let t:compareFile[2].bufNr = bufnr('%')
+   """"""""""""""""""""""""""
+   "  list window settings  "
+   """"""""""""""""""""""""""
+   call s:setTempBuffer()
+   wincmd J
+   setlocal cursorline
+   resize 8
+   setlocal winfixheight
+   " highlight filenames
+   " TODO: move to a syntax file when it is created (and documented on the
+   " help)
+   match SpecialKey /^.\{-}[/\\]\zs[^/\\]\+\ze@@/
+   setlocal nowrap
+   " 'expandtab' is not useful on this window, and can cause problems. 
+   " E.g.: when a variable contains \t it will expand to spaces when its
+   " contents are inserted, thus this variable won't match the inserted text
+   " on a substitute() used to remove it.
+   setlocal noexpandtab
+   """""""""""""""""""""""""""
+   "  list window  mappings  "
+   """""""""""""""""""""""""""
+   call s:commonMappings()
+   nnoremap <buffer> <silent> <CR> :call <SID>compareFiles(0)<CR>
+   " map D to the same function on fugitive plugin
+   nnoremap <buffer> <silent> D :call <SID>compareFiles(0)<CR>
+   nnoremap <buffer> <silent> J :call <SID>compareFiles(1)<CR>
+   nnoremap <buffer> <silent> K :call <SID>compareFiles(-1)<CR>
+   " trigger the diff on the first line of the list
+   call s:compareFiles(0)
 endfunction
 
 function! s:compareFiles(offset) " {{{1
@@ -131,25 +141,36 @@ function! s:compareItem(listItem) " {{{1
             \ {'name' : '', 'cmd' : ''},
             \ {'name' : '', 'cmd' : ''},
    \ ]
-   if a:listItem !~ ';'
+   let item = a:listItem
+
+   if item !~ ';'
+      " Change item containing only '/path/file@@version/N' and replace with
+      " '/path/file@@version/N-1 ; /path/file@@version/N' 
+      let item = substitute(item, '\v^(\s*[^ \t;@]+\@\@[^ \t;]{-})(\d+>)\s*$',
+               \ '\=submatch(1).(submatch(2)-1)." ; ".submatch(1).submatch(2)', 
+               \ "")
+      " TODO: move to a separate dictionary in order to make this code
+      " independent of ClearCase; maybe retrieve it from the remote system, in
+      " order to fix #14
+   endif
+
+   if item !~ ';'
       " single file specified
-      let file[0].cmd = "call setline(1, split(".
-               \ "vvcs#remote#execute('pred', '". a:listItem."')".
-               \ "['value'], '\n'))"
-      let file[0].name = fnamemodify(a:listItem, ":t")
-      let file[1].cmd = 'edit '.a:listItem
+      let file[0].cmd = "call s:setCurrentLine(".
+               \ "vvcs#remote#execute('pred', '". item."')['value'])"
+      let file[0].name = fnamemodify(item, ":t")
+      let file[1].cmd = 'edit '.item
    else
       " two files specified
-      let splitItem = split(a:listItem, '\s*;\s*')
+      let splitItem = split(item, '\s*;\s*')
       if len(splitItem) != 2
          call vvcs#log#error('invalid number of files: '.len(splitItem))
          return
       endif
       for i in range(len(splitItem))
          let file[i].name = substitute(splitItem[i], '@.*','','')
-         let file[i].cmd = "call setline(1, split(".
-                  \ 'vvcs#remote#execute("catVersion", splitItem[i])'.
-                  \ "['value'], '\n'))"
+         let file[i].cmd = "call s:setCurrentLine(".
+                  \ "vvcs#remote#execute('catVersion', splitItem[i])['value'])"
       endfor
    endif
 
@@ -159,6 +180,8 @@ function! s:compareItem(listItem) " {{{1
       diffoff
       if &buftype == 'nofile'
          setlocal modifiable
+         " TODO: use command to delete the buffer which doesn't changes the
+         " paste register
          1,$d
       else
          enew
@@ -196,9 +219,11 @@ function! s:compareItem(listItem) " {{{1
       redraw
       " try to avoid some redraw problems
       " exe t:compareFile[1].winNr.'wincmd w'
-      " normal! gg]c
+      " redraw
       " wincmd p
-      " redraw!
+      " redraw
+      " normal! gg]c
+      " redraw
    else
       diffo!
       exe t:compareFile[1].winNr.'wincmd w'
@@ -266,6 +291,22 @@ function! s:updateWindowNumbers() " {{{1
    " echo t:compareFile
    return 1
 endfunction
+
+
+function! s:setCurrentLine(content) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Replace the current line with the specified string (which may spam multiple
+" lines).
+"
+" It avoids some problems from call setline(getline('.'), split('...', '\n')).
+" E.g.: if the string starts with a newline them split() will remove it. If
+" the keepempty is set, split will include the first empty line, but it will
+" also include an extra one at the end if the last line ends in '\n'.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   put =a:content 
+   normal! '[kdd
+endfunction
+
 
 let &cpo = save_cpo
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :

@@ -118,6 +118,7 @@ By default, vvcs adds the following mappings:
    <leader>vd              <Plug>VcDiff
    <leader>vo              <Plug>VcCheckout
    <leader>vc              <Plug>VcCodeReview
+   <leader>vl              <Plug>VcListCheckedout
    <leader>vg              <Plug>VcGetRemotePath
 
 ==============================================================================

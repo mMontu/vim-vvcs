@@ -4,23 +4,26 @@
 
 let save_cpo = &cpo   " allow line continuation
 set cpo&vim
+" TODO: create cache.vim
 
 function! vvcs#utils#writeCacheFile(lines, file) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Write list of lines to file on cache directory (an existing file is
 " overwritten)
+" Return the full path of the specified filename.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let fileName = g:vvcs_cache_dir.'/'.a:file
+   let fileName = vvcs#utils#GetCacheFileName(a:file)
    if s:checkDirectory(fileName)
-      silent! call writefile(a:lines, fileName)
+      silent call writefile(a:lines, fileName)
    endif
+   return fileName
 endfunction
 
 function! vvcs#utils#readCacheFile(file) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Return list of lines from file on cache directory
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let fileName = g:vvcs_cache_dir.'/'.a:file
+   let fileName = vvcs#utils#GetCacheFileName(a:file)
    if !filereadable(fileName)
       return []
    endif
@@ -43,7 +46,7 @@ function! vvcs#utils#DisplayCacheFile(file) " {{{1
 " Return true when opened the file (and it wasn't already present in current
 " tabpage)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let fileName = g:vvcs_cache_dir.'/'.a:file
+   let fileName = vvcs#utils#GetCacheFileName(a:file)
    let winNr = bufwinnr(fileName)
    if winNr != -1
       exe winNr.'wincmd w'
@@ -55,6 +58,13 @@ function! vvcs#utils#DisplayCacheFile(file) " {{{1
       return 1
    endif
    return 0
+endfunction
+
+function! vvcs#utils#GetCacheFileName(file) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Return the full path of the specified filename
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   return g:vvcs_cache_dir.'/'.a:file
 endfunction
 
 function! s:checkDirectory(file) " {{{1
