@@ -159,7 +159,7 @@ function! s:compareItem(listItem) " {{{1
       let file[0].cmd = "call s:setCurrentLine(".
                \ "vvcs#remote#execute('pred', '". item."')['value'])"
       let file[0].name = fnamemodify(item, ":t")
-      let file[1].cmd = 'edit '.item
+      let file[1].cmd = 'silent edit '.item
    else
       " two files specified
       let splitItem = split(item, '\s*;\s*')
@@ -180,9 +180,7 @@ function! s:compareItem(listItem) " {{{1
       diffoff
       if &buftype == 'nofile'
          setlocal modifiable
-         " TODO: use command to delete the buffer which doesn't changes the
-         " paste register
-         1,$d
+         silent 1,$delete _
       else
          enew
          call s:setTempBuffer()
@@ -215,12 +213,15 @@ function! s:compareItem(listItem) " {{{1
    if line('$') > 1 || getline(1) != ''
       normal! gg
       redraw!
-      normal! ]c
-      redraw
+      " normal! ]c
+      " redraw!
+      " normal! zb
+      " redraw!
       " try to avoid some redraw problems
-      " exe t:compareFile[1].winNr.'wincmd w'
-      " redraw
-      " wincmd p
+      exe t:compareFile[1].winNr.'wincmd w'
+      normal! gg
+      redraw!
+      wincmd p
       " redraw
       " normal! gg]c
       " redraw
@@ -303,8 +304,9 @@ function! s:setCurrentLine(content) " {{{1
 " the keepempty is set, split will include the first empty line, but it will
 " also include an extra one at the end if the last line ends in '\n'.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   put =a:content 
-   normal! '[kdd
+   silent put =a:content 
+   " delete original line
+   silent '[-1delete _
 endfunction
 
 

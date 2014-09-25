@@ -1,5 +1,7 @@
 " Test 'VcDiff' command 
 
+call SaveRegisters()
+
 " set splitright
 echomsg '>> Test successful invocation (single line)'
 call vvcs#log#clear()
@@ -35,5 +37,8 @@ VcDiff
 " check the contents of the log
 call EchoAllWindows()
 tabc
+
+" check for corrupted registers
+call CheckRegisters()
 
 call vimtest#Quit()

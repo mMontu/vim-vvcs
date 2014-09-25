@@ -9,7 +9,7 @@ function! TestCodeReview(msg, reviewFile, close)
       normal q
    endif
 endfunction
-
+call SaveRegisters()
 
 """""""""""""""""""""""""""""""""""
 "  simple successful invocations  "
@@ -48,5 +48,10 @@ normal \j
 call EchoAllWindows()
 normal q
 normal q
+
+""""""""""""""""""""""""""""""""""""""""
+"  check if any register was changed   "
+""""""""""""""""""""""""""""""""""""""""
+call CheckRegisters()
 
 call vimtest#Quit()

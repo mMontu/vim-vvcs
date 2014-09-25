@@ -30,6 +30,66 @@ function! EchoAllWindows()
    exe startWin.'wincmd w'
 endfunction
 
+function! ClearRegisters() " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Set unusual content on registers to detect if any changes
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   redir => l:register_out
+   silent register
+   redir end
+   let l:register_list = split(l:register_out, '\n')
+   call remove(l:register_list, 0) " remove header (-- Registers --)
+   call map(l:register_list, "substitute(v:val, '^.\\(.\\).*', '\\1', '')")
+   call filter(l:register_list, 'v:val !~ "[%#=.:]"') " skip readonly registers
+   for i in range(len(l:register_list))
+      exe 'let @'.l:register_list[i]."= '".strftime("%d/%m/%Y %H:%M:%S")." . ".i."'"
+   endfor
+endfunction
+function! SaveRegisters() " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Save the contents of registers in order to check with CheckRegisters()
+" Ignore some read-only registers, as =, % and #
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   if !exists('g:vvcs_saved_registers')
+      call ClearRegisters()
+   endif
+   redir => l:register_out
+   silent register
+   redir end
+   let g:vvcs_saved_registers = split(l:register_out, '\n')
+   call remove(g:vvcs_saved_registers, 0)
+   call filter(g:vvcs_saved_registers, 'v:val !~ "^\"[%#=]"')
+   echom string(g:vvcs_saved_registers)
+endfunction
+function! CheckRegisters() " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Check registers contents against the values stored with SaveRegisters()
+" This is function uses TAP (:h VimTAP). If this becomes a problem it is
+" possible to change it to return a value indicanting success, which should be
+" included on the .msgok files.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   call vimtest#StartTap()
+   call vimtap#Plan(3)
+   call vimtap#Is(exists('g:vvcs_saved_registers'), 1, 
+            \ "SaveRegisters() called first")
+
+   " store the previous register contents and call SaveRegisters again in
+   " order to read the new contents
+   let l:prev_registers = g:vvcs_saved_registers
+   call SaveRegisters()
+
+   call vimtap#Is(len(g:vvcs_saved_registers), len(l:prev_registers),
+            \ "check lenght of lists")
+
+   for i in range(len(l:prev_registers))
+      if l:prev_registers[i] !=# g:vvcs_saved_registers[i]
+         break
+      endif
+   endfor
+   call vimtap#Is(g:vvcs_saved_registers[i], l:prev_registers[i], 
+            \ "register ".split(g:vvcs_saved_registers[i])[0])
+endfunction
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                           Stub for system calls                            "
