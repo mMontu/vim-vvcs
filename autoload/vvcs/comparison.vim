@@ -174,23 +174,26 @@ function! s:compareItem(listItem) " {{{1
       endfor
    endif
 
+   diffoff!
    " display the files
    for i in range(2)
       exe t:compareFile[i].winNr.'wincmd w'
-      diffoff
-      if &buftype == 'nofile'
-         setlocal modifiable
-         silent 1,$delete _
-      else
+      " always chage the diff buffers to allow comparison between previous
+      " versions of different files
+      " if &buftype == 'nofile'
+      "    setlocal modifiable
+      "    silent 1,$delete _
+      " else
          enew
          call s:setTempBuffer()
          setlocal modifiable
-      endif
+         call s:commonMappings()
+      " endif
       exe 'silent file '.s:VVCS_CODE_REVIEW_DIFF_LABEL[i].'\ '. file[i].name
       exe file[i].cmd
-      if &buftype != 'nofile'
+      " if &buftype != 'nofile'
          let t:compareFile[i].bufNr = bufnr('%') " bufNr changes if cmd is edit
-      endif
+      " endif
       " trigger autocmd to detect filetype and execute any filetype plugins
       silent doautocmd BufNewFile
       if line('$') > 1 || getline(1) != ''
@@ -228,6 +231,7 @@ function! s:compareItem(listItem) " {{{1
    else
       diffo!
       exe t:compareFile[1].winNr.'wincmd w'
+      redraw! " avoid hit-enter message
    endif
 endfunction
 

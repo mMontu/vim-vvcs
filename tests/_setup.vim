@@ -59,7 +59,6 @@ function! SaveRegisters() " {{{1
    let g:vvcs_saved_registers = split(l:register_out, '\n')
    call remove(g:vvcs_saved_registers, 0)
    call filter(g:vvcs_saved_registers, 'v:val !~ "^\"[%#=]"')
-   echom string(g:vvcs_saved_registers)
 endfunction
 function! CheckRegisters() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

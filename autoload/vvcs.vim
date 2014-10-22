@@ -165,6 +165,7 @@ function! vvcs#commitList() " {{{1
    let lines = getline(startStaged+1, startNotStaged-1)
    let commitMsg = VvcsInput("Commit message: ", "")
    if commitMsg !~ '\S'
+      call vvcs#log#msg("empty message - aborted")
       return
    endif
    call filter(lines, 'v:val =~ ''\S''') " remove blank lines
