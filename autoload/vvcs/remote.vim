@@ -78,6 +78,7 @@ let g:vvcs#remote#op = {
    \ 'checkedoutList' : {
          \'args' : [],
          \'cmd':  'ct lsco -avobs -cview',
+         \'filter': 'v:val !~ "\\vadded (directory|file) element"',
          \'adjust': 'vvcs#remote#toLocalPath('
                \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
    \},
@@ -158,6 +159,10 @@ function! vvcs#remote#execute(key, ...) " {{{1
       call vvcs#log#msg(message)
    endif
    let ret['value'] = VvcsSystem(cmd)
+   if has_key(g:vvcs#remote#op[a:key], 'filter')
+      let ret['value'] = join(filter(split(ret['value'], "\n"), 
+               \ g:vvcs#remote#op[a:key]['filter']), "\n")
+   endif
    if has_key(g:vvcs#remote#op[a:key], 'adjust')
       let ret['value'] = join(map(split(ret['value'], "\n"), 
                \ g:vvcs#remote#op[a:key]['adjust']), "\n")

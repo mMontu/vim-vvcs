@@ -270,6 +270,11 @@ silent          by default the output of the commands is stored in the log
                 which is useful for commands that retrieve the contents of
                 source files.
 
+filter          some remote commands requires post-processing in order to
+                provide meaningful results. The value of this entry is used as
+                the second argument of call to |filter()|, in order to remove
+                the lines of the result.
+
 adjust          some remote commands requires post-processing in order to
                 provide meaningful results. The value of this entry is used as
                 the second argument of call to |map()|, in order to change all
