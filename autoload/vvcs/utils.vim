@@ -83,6 +83,15 @@ function! s:checkDirectory(file) " {{{1
    return 1
 endfunction
 
+function! vvcs#utils#isProjectLogFile(file) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Return true if the specified file (on local path) is contained on the
+" project log directory (g:vvcs_project_log)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   return !empty(g:vvcs_project_log) &&
+         \ stridx(vvcs#remote#toRemotePath(a:file), g:vvcs_project_log) != -1
+endfunction
+
 
 let &cpo = save_cpo
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :

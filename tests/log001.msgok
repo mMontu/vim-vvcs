@@ -3,6 +3,7 @@
 [vvcs] Error 1
 [vvcs] Msg 1
 [vvcs] Cmd 1...
+[vvcs] Cmd 1 done
 
 <EchoAllWindows: 2>
 echo window 1:
@@ -15,6 +16,7 @@ Error 1
 /\d\+:\d\+:\d\+: >>> Msg <<</
 Msg 1
 /\d\+:\d\+:\d\+: >>> Cmd 1 <<</
+/\d\+:\d\+:\d\+: >>> Cmd 1 done <<</
 /\d\+:\d\+:\d\+: Cmd log line 1/
 Cmd log line 2
 Cmd log line 3
@@ -44,6 +46,7 @@ nodiff
 [vvcs] Error 1
 [vvcs] Msg 1
 [vvcs] Cmd 1...
+[vvcs] Cmd 1 done
 
 <EchoAllWindows: 1>
 echo window 1:

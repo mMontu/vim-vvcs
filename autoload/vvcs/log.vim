@@ -8,6 +8,10 @@ set cpo&vim
 " constants {{{1
 let s:PLUGIN_TAG = '[vvcs] '
 
+" variables {{{1
+let s:currentCmd = ''
+
+
 function! vvcs#log#error(msg) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Output an error message to display and log file. Return the formmatted error
@@ -25,19 +29,59 @@ function! vvcs#log#msg(msg) " {{{1
 " Output a message to display and log file
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    echohl Question
-   echomsg s:PLUGIN_TAG.a:msg
+   echo s:PLUGIN_TAG.a:msg
    echohl None
    call vvcs#log#append(['>>> Msg <<<', a:msg])
 endfunction
 
-function! vvcs#log#startCommand(msg) " {{{1
+function! vvcs#log#startCommand(cmd) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Output start command indication to display and log file
+" Output start command indication to display and log file. 
+"
+" As some commands may use another VVCS commmands on their implementation,
+" further calls to this method are ignored until the next call to either
+" vvcs#log#commandSucceed() or vvcs#log#commandFailed() with the same
+" argument.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   if !empty(s:currentCmd)
+      return
+   endif
+   let s:currentCmd = a:cmd
    echohl Directory
-   echomsg s:PLUGIN_TAG.a:msg.'...'
+   echo s:PLUGIN_TAG.a:cmd.'...'
    echohl None
-   call vvcs#log#append(['>>> '.a:msg.' <<<'])
+   call vvcs#log#append(['>>> '.a:cmd.' <<<'])
+endfunction
+
+function! vvcs#log#commandSucceed(cmd) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Output command result to display and log file, but only if a:cmd is the main
+" running command (which is specified on the first vvcs#log#startCommand()).
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   if a:cmd ==# s:currentCmd
+      let s:currentCmd = ''
+      redraw " clear previous messages
+      let msg = a:cmd.' done'
+      echohl Question
+      echo s:PLUGIN_TAG.msg
+      echohl None
+      call vvcs#log#append(['>>> '.msg.' <<<'])
+   endif
+endfunction
+
+function! vvcs#log#commandFailed(cmd) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Output command result to display and log file, but only if a:cmd is the main
+" running command (which is specified on the first vvcs#log#startCommand()).
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   if a:cmd ==# s:currentCmd
+      let s:currentCmd = ''
+      let msg = a:cmd.' failed'
+      echohl Question
+      echomsg s:PLUGIN_TAG.msg
+      echohl None
+      call vvcs#log#append(['>>> '.msg.' <<<'])
+   endif
 endfunction
 
 function! vvcs#log#append(lines) " {{{1

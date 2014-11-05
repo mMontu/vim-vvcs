@@ -12,56 +12,88 @@ let s:VVCS_NOT_STAGED_MARKER = g:vvcs_review_comment.
          \ ' Changes not staged for commit:'
 let s:VVCS_LIST_CHECKEDOUT_FILE = "listCheckedout.review" 
 
-function! vvcs#command(cmd, ...) " {{{1
+function! vvcs#up(...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" same as vvc#op.execute(), using the current file as optional argument if
-" none is available. Requires a single optional argument.
+" Send files on specified path (default: current file) to the remote machine.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let cmdName = 'Vc'.substitute(a:cmd, '\v(.)', '\U\1', '')
-   call vvcs#log#startCommand(cmdName)
-   if a:0 == 1
-      let ret = vvcs#remote#execute(a:cmd, a:1)
-   else
-      let ret = vvcs#remote#execute(a:cmd, expand("%:p"))
+   let path = a:0 ? a:1 : expand("%:p")
+   if vvcs#utils#isProjectLogFile(path)
+      if VvcsConfirm("This seems to be a log file, thus it shouldn't be ".
+               \ "edited locally.\nProceed sending it to ".
+               \ "the remote machine?", "&Continue\n&Abort", 2) != 1 
+         return
+      endif
    endif
+   call vvcs#log#startCommand('VcUp')
+   let ret = vvcs#remote#execute('up', path)
    if !empty(ret['error'])
-      return
+      call vvcs#log#commandFailed('VcUp')
    endif
-   redraw
-   call vvcs#log#msg(cmdName.' done')
+   call vvcs#log#commandSucceed('VcUp')
+endfunction
+
+function! vvcs#down(autoread, ...) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Retrieve files on specified path (default: current file) from the remote
+" machine.
+" If a:autoread is set (or the file is in g:vvcs_project_log path) and a
+" single file is specified then it is reloaded without confirmation.
+" Return true if succeeds.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   call vvcs#log#startCommand('VcDown')
+   let path = a:0 ? a:1 : expand("%:p")
+   let ret = vvcs#remote#execute('down', path)
+   if !empty(ret['error'])
+      call vvcs#log#commandFailed('VcDown')
+      return 0
+   endif
+   let restoreBuf = 0
+   if a:autoread || vvcs#utils#isProjectLogFile(path)
+      let bufNum = bufnr(path)
+      let bufAutoRead = getbufvar(bufNum, "&autoread")
+      if bufNum != -1 && !bufAutoRead
+         " skip reload confirmation by temporary setting 'autoread'
+         call setbufvar(bufNum, "&autoread", 1)
+         let restoreBuf = 1
+      endif
+   endif
    checktime  " warn for loaded files changed outside vim
+   if restoreBuf
+      call setbufvar(bufNum, "&autoread", 0)
+   endif
+   call vvcs#log#commandSucceed('VcDown')
+   return 1
 endfunction
 
 function! vvcs#diff() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Display diff of current file and it predecessor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   call vvcs#log#startCommand('VcDiff')
    call vvcs#comparison#createSingle(expand("%:p"))
 endfunction
 
-function! vvcs#checkout(file) " {{{1
+function! vvcs#checkout(autoread, file) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Checkout and retrieve the specified file
+"
+" If the file is readonly/unmofied or a:autoread is set it will be reloaded
+" without asking for confirmation. 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    call vvcs#log#startCommand('VcCheckout')
    let ret = vvcs#remote#execute('checkout', a:file)
-   if !empty(ret['error'])
-      return
+   if empty(ret['error'])
+      if vvcs#down(a:autoread || (&readonly && !&modified), a:file)
+         call vvcs#log#commandSucceed('VcCheckout')
+         return
+      endif
    endif
-   let ret = vvcs#remote#execute('down', a:file)
-   if !empty(ret['error'])
-      return
-   endif
-   call vvcs#log#msg('VcCheckout done')
-   checktime  " warn for loaded files changed outside vim
+   call vvcs#log#commandFailed('VcCheckout')
 endfunction
 
 function! vvcs#codeReview() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Display diff of a list of files
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   call vvcs#log#startCommand('VcCodeReview')
    " TODO: move to utils#browse(prompt, histCacheFile?)
    """"""""""""""""""""""""
    "  Retrieve file list  "
@@ -101,7 +133,6 @@ function! vvcs#listCheckedOut() " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Display diff of currently checkouted files and its predecessors
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   call vvcs#log#startCommand('VcListCheckedout')
    let retCheckedoutL = vvcs#remote#execute('checkedoutList')
    if !empty(retCheckedoutL['error'])
       return
@@ -168,6 +199,8 @@ function! vvcs#commitList() " {{{1
       call vvcs#log#msg("empty message - aborted")
       return
    endif
+   call vvcs#log#startCommand('CommitList')
+   let fail = 0
    call filter(lines, 'v:val =~ ''\S''') " remove blank lines
    call map(lines, 'substitute(v:val, ''^\s\+\|\s\+$'', "", "g")') " trim
    for line in lines
@@ -177,15 +210,20 @@ function! vvcs#commitList() " {{{1
       " remote is different
       let ret = vvcs#remote#execute('commit', line, commitMsg)
       if empty(ret['error'])
-         call vvcs#remote#execute('down', line)
-         checktime  " warn for loaded files changed outside vim
+         exe 'VcDown! '.line
       else
          call vvcs#log#error("failed to commit '".line."'")
+         let fail = 1
       endif
       " TODO: move successfully commited files to another list, to allow the
       " user to retry the commit after it solves problems like reserved
       " checkouts by another user
    endfor
+   if fail
+      call vvcs#log#commandFailed('CommitList')
+   else
+      call vvcs#log#commandSucceed('CommitList')
+   endif
 endfunction
 
 function! vvcs#getRemotePath() " {{{1

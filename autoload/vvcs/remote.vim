@@ -78,6 +78,7 @@ let g:vvcs#remote#op = {
    \ 'checkedoutList' : {
          \'args' : [],
          \'cmd':  'ct lsco -avobs -cview',
+         \'message' : 'retrieving file list ...',
          \'filter': 'v:val !~ "\\vadded (directory|file) element"',
          \'adjust': 'vvcs#remote#toLocalPath('
                \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
