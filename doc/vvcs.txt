@@ -115,6 +115,9 @@ COMMANDS                                                        *vvcs-commands*
                         useful when accessing the remote machine directly
                         while browsing the code on local machine.
 
+                                                                     *:VcLog*
+:VcLog                  Display the plugin log file.
+
 ==============================================================================
 KEY MAPPINGS                                                    *vvcs-mappings*
 

@@ -199,7 +199,7 @@ function! vvcs#commitList() " {{{1
       call vvcs#log#msg("empty message - aborted")
       return
    endif
-   call vvcs#log#startCommand('CommitList')
+   call vvcs#log#startCommand('Commit')
    let fail = 0
    call filter(lines, 'v:val =~ ''\S''') " remove blank lines
    call map(lines, 'substitute(v:val, ''^\s\+\|\s\+$'', "", "g")') " trim
@@ -220,9 +220,9 @@ function! vvcs#commitList() " {{{1
       " checkouts by another user
    endfor
    if fail
-      call vvcs#log#commandFailed('CommitList')
+      call vvcs#log#commandFailed('Commit')
    else
-      call vvcs#log#commandSucceed('CommitList')
+      call vvcs#log#commandSucceed('Commit')
    endif
 endfunction
 

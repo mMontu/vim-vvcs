@@ -17,6 +17,7 @@ command! -bar -bang -nargs=0 VcCheckout
 command! -nargs=0 VcCodeReview call vvcs#codeReview()
 command! -nargs=0 VcListCheckedout call vvcs#listCheckedOut()
 command! -nargs=0 VcGetRemotePath call vvcs#getRemotePath()
+command! -nargs=0 VcLog call vvcs#log#open()
 
 " Mappings {{{1
 if !hasmapto('<Plug>VcUp')
