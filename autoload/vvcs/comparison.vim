@@ -256,8 +256,10 @@ function! s:commonMappings() " {{{1
    nnoremap <buffer> <c-up> [c
    nnoremap <buffer> J ]c
    nnoremap <buffer> K [c
+   " 'q' closes without confirmation when there is no review list
    nnoremap <buffer> <silent> q 
-            \ :if VvcsConfirm("Quit comparison?", "&Yes\n&No") == 1 <bar> 
+            \ :if t:compareFile[2].bufNr == -1 <bar><bar>
+            \        VvcsConfirm("Quit comparison?", "&Yes\n&No") == 1 <bar>
             \ diffo! <bar> tabc <bar> endif<CR>
    nnoremap <buffer> <silent> <leader>j :call <SID>compareFiles(1)<CR>
    nnoremap <buffer> <silent> <leader>k :call <SID>compareFiles(-1)<CR>
