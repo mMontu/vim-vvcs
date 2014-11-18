@@ -114,6 +114,7 @@ function! s:compareFiles(offset) " {{{1
    if !s:updateWindowNumbers()
       return
    endif
+   let initialWindow = winnr()
    exe t:compareFile[2].winNr.'wincmd w'
    call cursor(line('.') + a:offset, 0)
 
@@ -129,7 +130,8 @@ function! s:compareFiles(offset) " {{{1
    endw
    redraw  " avoid that cursor move outside window
    let files = substitute(getline('.'), '\s*'.g:vvcs_review_comment.'.*','','')
-   return s:compareItem(files)
+   call s:compareItem(files)
+   exe initialWindow.'wincmd w'
 endfunction
 
 function! s:compareItem(listItem) " {{{1
