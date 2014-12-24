@@ -265,12 +265,15 @@ args            its value is a list of named arguments the command expects.
                 to the equivalent remote path (see |g:vvcs_fix_path|).
 
 cmd             its value is a string containing the command to be executed on
-                the remote machine.
+                the remote machine. Note that the cmd value has an extra
+                quoting. This is necessary as it is passed to |eval()| when it
+                is used, in order to obtain the current value of any variable
+                used on its definition.
 
 Example: >
    let g:vvcs#remote#op['checkout'] =  {
             \'args' : ['<path>'],
-            \'cmd': "ct co -unreserved -nc ".g:vvcs_remote_mark."<path>",
+            \'cmd': '"ct co -unreserved -nc ".g:vvcs_remote_mark."<path>"',
       \}
 <
 Each command may have a number of optional entries:
@@ -304,7 +307,7 @@ adjust          some remote commands requires post-processing in order to
 Example: >
    let var['checkedoutList'] =  {
             \'args' : [],
-            \'cmd':  'ct lsco -avobs -cview',
+            \'cmd':  '"ct lsco -avobs -cview"',
             \'message' : 'retrieving list ...',
             \'adjust': 'vvcs#remote#toLocalPath('
                   \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',

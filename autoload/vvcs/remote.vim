@@ -46,38 +46,38 @@ endfunction
 let g:vvcs#remote#op = { 
    \'up' : {
          \'args' : ['<path>'],
-         \'cmd': "rsync -azvC ".s:rsyncExcludePat()." <path> -e ssh ".
-         \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.'/'.
-         \ g:vvcs_remote_mark."<path>",
+         \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." <path> -e ssh ".
+         \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
+         \ g:vvcs_remote_mark."<path>"',
          \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>'],
-         \'cmd': "rsync -azvC ".s:rsyncExcludePat()." -e ssh ".
-         \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.'/'.
-         \ g:vvcs_remote_mark."<path> <path>",
+         \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." -e ssh ".
+         \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
+         \ g:vvcs_remote_mark."<path> <path>"',
          \'localCommand' : '',
    \},
    \'pred' : {
          \'args' : ['<filepath>'],
-         \'cmd':  'cat '.g:vvcs_remote_mark.
-            \'<filepath>@@\`cleartool descr -pred -short '.g:vvcs_remote_mark.
-            \'<filepath>\`',
+         \'cmd':  '"cat ".g:vvcs_remote_mark.
+            \"<filepath>@@\`cleartool descr -pred -short ".g:vvcs_remote_mark.
+            \"<filepath>\\`"',
          \'silent' : '',
          \'message' : 'retrieving previous version of <filepath> ...',
    \},
    \'checkout' : {
          \'args' : ['<path>'],
-         \'cmd': "ct co -unreserved -nc ".g:vvcs_remote_mark."<path>",
+         \'cmd': '"ct co -unreserved -nc ".g:vvcs_remote_mark."<path>"',
    \},
    \'commit' : {
          \'args' : ['<path>', '<comment>'],
-         \'cmd': 'ct ci -c \"<comment>\" '.g:vvcs_remote_mark.'<path>',
+         \'cmd': '''ct ci -c \"<comment>\" ''.g:vvcs_remote_mark."<path>"',
          \'message' : 'committing <path> ...',
    \},
    \ 'checkedoutList' : {
          \'args' : [],
-         \'cmd':  'ct lsco -avobs -cview',
+         \'cmd':  '"ct lsco -avobs -cview"',
          \'message' : 'retrieving file list ...',
          \'filter': 'v:val !~ "\\vadded (directory|file) element"',
          \'adjust': 'vvcs#remote#toLocalPath('
@@ -85,13 +85,13 @@ let g:vvcs#remote#op = {
    \},
    \'catVersion' : {
          \'args' : ['<remFile>'],
-         \'cmd': "cat <remFile>",
+         \'cmd': '"cat <remFile>"',
          \'silent' : '',
          \'message' : 'retrieving <remFile> ...',
    \},
    \'-c' : {
          \'args' : ['<cmd>'],
-         \'cmd': "<cmd>",
+         \'cmd': '"<cmd>"',
    \},
 \}
 
@@ -123,7 +123,7 @@ function! vvcs#remote#execute(key, ...) " {{{1
    if has_key(g:vvcs#remote#op[a:key], 'message')
       let message = g:vvcs#remote#op[a:key]['message']
    endif
-   let cmd = g:vvcs#remote#op[a:key].cmd
+   let cmd = eval(g:vvcs#remote#op[a:key].cmd)
    for i in range(len(g:vvcs#remote#op[a:key].args))
       let par = g:vvcs#remote#op[a:key].args[i]
       let val = a:000[i]
