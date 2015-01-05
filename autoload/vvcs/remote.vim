@@ -48,15 +48,15 @@ let g:vvcs#remote#op['ClearCase'] = {
    \'up' : {
          \'args' : ['<path>'],
          \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." <path> -e ssh ".
-         \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
-         \ g:vvcs_remote_mark."<path>"',
+            \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
+            \ g:vvcs_remote_mark."<path>"',
          \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>'],
          \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." -e ssh ".
-         \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
-         \ g:vvcs_remote_mark."<path> <path>"',
+            \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
+            \ g:vvcs_remote_mark."<path> <path>"',
          \'localCommand' : '',
    \},
    \'pred' : {
@@ -96,6 +96,38 @@ let g:vvcs#remote#op['ClearCase'] = {
    \},
 \}
 
+
+" Note: checkedoutList for svn assumes that g:vvcs_fix_path['sub'] contains
+" the remote root directory, as it there is no svn command to retrieve this
+" information (it is not present on 'svn info' of svn version 1.6.11)
+let g:vvcs#remote#op['svn'] = { 
+   \'up' : {
+         \'args' : ['<path>'],
+         \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." <path> -e ssh ".
+            \ g:vvcs_remote_host.":".g:vvcs_remote_mark."<path>"',
+         \'localCommand' : '',
+   \},
+   \'down' : {
+         \'args' : ['<path>'],
+         \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." -e ssh ".
+            \ g:vvcs_remote_host.":".g:vvcs_remote_mark."<path> <path>"',
+         \'localCommand' : '',
+   \},
+   \'pred' : {
+         \'args' : ['<filepath>'],
+         \'cmd':  '"svn cat --non-interactive -r HEAD ".g:vvcs_remote_mark.
+            \ "<filepath>"',
+         \'silent' : '',
+         \'message' : 'retrieving previous version of <filepath> ...',
+   \},
+   \ 'checkedoutList' : {
+         \'args' : [],
+         \'cmd':  '"svn status ".g:vvcs_fix_path["sub"]',
+         \'message' : 'retrieving file list ...',
+         \'adjust': 'vvcs#remote#toLocalPath('
+               \ .'substitute(v:val, ''\v^\S\s*'', "", "g"))',
+   \},
+\}
 
 function! vvcs#remote#execute(key, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

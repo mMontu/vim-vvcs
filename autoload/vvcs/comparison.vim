@@ -306,12 +306,16 @@ function! s:setCurrentLine(content) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Replace the current line with the specified string (which may spam multiple
 " lines).
-"
-" It avoids some problems from call setline(getline('.'), split('...', '\n')).
-" E.g.: if the string starts with a newline them split() will remove it. If
-" the keepempty is set, split will include the first empty line, but it will
-" also include an extra one at the end if the last line ends in '\n'.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   " Using :put avoids some problems from call setline(getline('.'),
+   " split('...', '\n')). E.g.: if the string starts with a newline them
+   " split() will remove it. If the keepempty is set, split will include the
+   " first empty line, but it will also include an extra one at the end if the
+   " last line ends in '\n'.
+   "
+   " Note that both ':put =var' and 'setline()' don't work for a:content that
+   " contains text in dos format -- '^M' is displayed at every line. It seems
+   " that the file format option is ignored for these commands.
    silent put =a:content 
    " delete original line
    silent '[-1delete _

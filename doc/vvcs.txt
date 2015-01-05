@@ -110,6 +110,11 @@ COMMANDS                                                        *vvcs-commands*
                                         status'
                         <leader>cc      commit all the files staged for commit
 <
+                        Note that for svn (subversion) this commmand relies on
+                        |g:vvcs_fix_path|['sub'] matching the remote root
+                        directory of the repository, due to limitations of
+                        older versions of that tool.
+                        
                                                             *:VcGetRemotePath*
 :VcGetRemotePath        Retrieve remote path of current file, which can be
                         useful when accessing the remote machine directly
@@ -139,7 +144,7 @@ Use this option to indicate the remote version control system. >
 
    let g:vvcs_remote_vcs = 'ClearCase'
 <
-Built-in values: ClearCase
+Built-in values: ClearCase, svn
                                                          *'g:vvcs_remote_host'*
 Use this option to indicate the remote host address. >
 
