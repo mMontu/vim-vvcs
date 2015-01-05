@@ -108,9 +108,15 @@ function! vvcs#remote#execute(key, ...) " {{{1
    "  Check for invalid parameters  "
    """"""""""""""""""""""""""""""""""
    let ret = {'error' : '', 'value' : ''}
+   if !has_key(g:vvcs#remote#op, g:vvcs_remote_vcs)
+      let ret['error'] = vvcs#log#error('g:vvcs_remote_vcs invalid: '.
+               \ g:vvcs_remote_vcs."; valid values: ".
+               \ string(keys(g:vvcs#remote#op)))
+      return ret
+   endif
    let operation = g:vvcs#remote#op[g:vvcs_remote_vcs]
    if !has_key(operation, a:key)
-      let ret['error'] = vvcs#log#error('unknown command: ' . a:key)
+      let ret['error'] = vvcs#log#error('unknown command: '.a:key)
       return ret
    endif
    if a:0 != len(operation[a:key].args)
