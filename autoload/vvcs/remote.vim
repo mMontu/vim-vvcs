@@ -43,7 +43,8 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " common commands used to work on remote machines
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:vvcs#remote#op = { 
+let g:vvcs#remote#op = {}
+let g:vvcs#remote#op['ClearCase'] = { 
    \'up' : {
          \'args' : ['<path>'],
          \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." <path> -e ssh ".
@@ -107,11 +108,12 @@ function! vvcs#remote#execute(key, ...) " {{{1
    "  Check for invalid parameters  "
    """"""""""""""""""""""""""""""""""
    let ret = {'error' : '', 'value' : ''}
-   if !has_key(g:vvcs#remote#op, a:key)
+   let operation = g:vvcs#remote#op[g:vvcs_remote_vcs]
+   if !has_key(operation, a:key)
       let ret['error'] = vvcs#log#error('unknown command: ' . a:key)
       return ret
    endif
-   if a:0 != len(g:vvcs#remote#op[a:key].args)
+   if a:0 != len(operation[a:key].args)
       let ret['error'] = vvcs#log#error("incorrect number of parameters for '".
                \ a:key."': ".string(a:000))
       return ret
@@ -120,12 +122,12 @@ function! vvcs#remote#execute(key, ...) " {{{1
    """""""""""""""""""""""""""""""""""""""""""""""""""""""""
    "  Insert paremters on the remote command placeholders  "
    """""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   if has_key(g:vvcs#remote#op[a:key], 'message')
-      let message = g:vvcs#remote#op[a:key]['message']
+   if has_key(operation[a:key], 'message')
+      let message = operation[a:key]['message']
    endif
-   let cmd = eval(g:vvcs#remote#op[a:key].cmd)
-   for i in range(len(g:vvcs#remote#op[a:key].args))
-      let par = g:vvcs#remote#op[a:key].args[i]
+   let cmd = eval(operation[a:key].cmd)
+   for i in range(len(operation[a:key].args))
+      let par = operation[a:key].args[i]
       let val = a:000[i]
       if par =~# 'path'
          let val = s:handlePath(val)
@@ -153,20 +155,20 @@ function! vvcs#remote#execute(key, ...) " {{{1
    "  Execute remote command  "
    """"""""""""""""""""""""""""
    call vvcs#log#append(["'Will execute: ".cmd."'"])
-   if !has_key(g:vvcs#remote#op[a:key], 'localCommand')
+   if !has_key(operation[a:key], 'localCommand')
       let cmd = printf(g:vvcs_remote_cmd, cmd)
    endif
-   if has_key(g:vvcs#remote#op[a:key], 'message')
+   if has_key(operation[a:key], 'message')
       call vvcs#log#msg(message)
    endif
    let ret['value'] = VvcsSystem(cmd)
-   if has_key(g:vvcs#remote#op[a:key], 'filter')
+   if has_key(operation[a:key], 'filter')
       let ret['value'] = join(filter(split(ret['value'], "\n"), 
-               \ g:vvcs#remote#op[a:key]['filter']), "\n")
+               \ operation[a:key]['filter']), "\n")
    endif
-   if has_key(g:vvcs#remote#op[a:key], 'adjust')
+   if has_key(operation[a:key], 'adjust')
       let ret['value'] = join(map(split(ret['value'], "\n"), 
-               \ g:vvcs#remote#op[a:key]['adjust']), "\n")
+               \ operation[a:key]['adjust']), "\n")
    endif
 
    """""""""""""""""""""""
@@ -178,7 +180,7 @@ function! vvcs#remote#execute(key, ...) " {{{1
       call vvcs#log#append(split(ret['value'], "\n"))
       call vvcs#log#open()
       return ret
-   elseif !has_key(g:vvcs#remote#op[a:key], 'silent')
+   elseif !has_key(operation[a:key], 'silent')
       call vvcs#log#append(split(ret['value'], "\n"))
    endif
 

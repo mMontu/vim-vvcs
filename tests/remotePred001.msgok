@@ -1,15 +1,15 @@
 
->> Test successful invocation
+>> [ClearCase] Test successful invocation
 
 readOnly.h previous contents
 
->> Test failure due to invalid local path
+>> [ClearCase] Test failure due to invalid local path
 /\[[^]]*\] invalid path:.*/
 
->> Test failure due to invalid remote path
+>> [ClearCase] Test failure due to invalid remote path
 
 /.*cleartool: Error: Unable to access .*/
 
->> Test failure due to ssh error
+>> [ClearCase] Test failure due to ssh error
 
 /.*ssh: \(Could not resolve\|connect to host\).*/

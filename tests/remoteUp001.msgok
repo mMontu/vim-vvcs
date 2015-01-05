@@ -1,16 +1,16 @@
 
->> Test successful invocation
+>> [ClearCase] Test successful invocation
 
 /.*receiving file list ... done.*/
 
 /.*sent \d\+ bytes  received \d\+ bytes  \d\+\.\?\d* bytes\/sec/
 /.*total size is \d\+  speedup is \d\+\.\?\d*/
 
->> Test failure due to invalid local path
+>> [ClearCase] Test failure due to invalid local path
 /\[[^]]*\] invalid path:.*/
 
 
->> Test failure due to invalid remote path
+>> [ClearCase] Test failure due to invalid remote path
 
 /.*receiving file list ... done.*/
 
@@ -20,6 +20,6 @@
 /.*total size is \d\+  speedup is \d\+\.\?\d*/
 /.*rsync error: some files could not be transferred.*/
 
->> Test failure due to ssh error
+>> [ClearCase] Test failure due to ssh error
 
 /.*ssh: \(Could not resolve\|connect to host\).*/

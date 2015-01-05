@@ -56,6 +56,9 @@ endif
 noremap <unique> <Plug>VcGetRemotePath :VcGetRemotePath<CR>
 
 " Options {{{1
+if !exists("g:vvcs_remote_vcs")
+   let g:vvcs_remote_vcs = "<select_vvcs_remote_vcs>"
+endif
 if !exists("g:vvcs_fix_path")
    let g:vvcs_fix_path = { 'pat' : '', 'sub' : '' }
 endif

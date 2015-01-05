@@ -1,5 +1,9 @@
 " Test 'VcListCheckedout' command 
 
+" Only ClearCase is tested because other VCS only use different remote
+" operations, which are verified on other test cases
+let g:vvcs_remote_vcs = 'ClearCase'
+
 let g:vvcs_fix_path = {'pat' : 'AuxFiles', 'sub' : '/vobs'}
 call SaveRegisters()
 

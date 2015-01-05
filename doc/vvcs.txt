@@ -134,6 +134,12 @@ By default, vvcs adds the following mappings:
 ==============================================================================
 OPTIONS                                                         *vvcs-options*
 
+                                                         *'g:vvcs_remote_vcs'*
+Use this option to indicate the remote version control system. >
+
+   let g:vvcs_remote_vcs = 'ClearCase'
+<
+Built-in values: ClearCase
                                                          *'g:vvcs_remote_host'*
 Use this option to indicate the remote host address. >
 

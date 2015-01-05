@@ -1,27 +1,27 @@
 
->> Test successful invocation
+>> [ClearCase] Test successful invocation
 
 /.*Will execute.*/
 
 /.*Checked in .*" version ".*/
 
->> Test on already commited file
+>> [ClearCase] Test on already commited file
 
 /.*Will execute.*/
 
 /.*cleartool: Error: No branch of element is checked out to view ".*/
 /.*cleartool: Error: Unable to find checked out version for ".*/
 
->> Test failure due to invalid local path
+>> [ClearCase] Test failure due to invalid local path
 /\[[^]]*\] invalid path:.*/
 
->> Test failure due to invalid remote path
+>> [ClearCase] Test failure due to invalid remote path
 
 /.*Will execute.*/
 
 /.*cleartool: Error: Element name not found: ".*/
 
->> Test failure due to ssh error
+>> [ClearCase] Test failure due to ssh error
 
 /.*Will execute.*/
 
