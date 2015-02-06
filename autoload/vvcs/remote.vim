@@ -47,14 +47,14 @@ let g:vvcs#remote#op = {}
 let g:vvcs#remote#op['ClearCase'] = { 
    \'up' : {
          \'args' : ['<path>'],
-         \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." <path> -e ssh ".
+         \'cmd': '"rsync -azvuC ".s:rsyncExcludePat()." <path> -e ssh ".
             \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
             \ g:vvcs_remote_mark."<path>"',
          \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>'],
-         \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." -e ssh ".
+         \'cmd': '"rsync -azvuC ".s:rsyncExcludePat()." -e ssh ".
             \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
             \ g:vvcs_remote_mark."<path> <path>"',
          \'localCommand' : '',
@@ -103,13 +103,13 @@ let g:vvcs#remote#op['ClearCase'] = {
 let g:vvcs#remote#op['svn'] = { 
    \'up' : {
          \'args' : ['<path>'],
-         \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." <path> -e ssh ".
+         \'cmd': '"rsync -azvuC ".s:rsyncExcludePat()." <path> -e ssh ".
             \ g:vvcs_remote_host.":".g:vvcs_remote_mark."<path>"',
          \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>'],
-         \'cmd': '"rsync -azvC ".s:rsyncExcludePat()." -e ssh ".
+         \'cmd': '"rsync -azvuC ".s:rsyncExcludePat()." -e ssh ".
             \ g:vvcs_remote_host.":".g:vvcs_remote_mark."<path> <path>"',
          \'localCommand' : '',
    \},
