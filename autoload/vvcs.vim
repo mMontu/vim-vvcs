@@ -12,7 +12,7 @@ let s:VVCS_NOT_STAGED_MARKER = g:vvcs_review_comment.
          \ ' Changes not staged for commit:'
 let s:VVCS_LIST_CHECKEDOUT_FILE = "listCheckedout.review" 
 
-function! vvcs#up(...) " {{{1
+function! vvcs#up(overwrite, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Send files on specified path (default: current file) to the remote machine.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -25,14 +25,14 @@ function! vvcs#up(...) " {{{1
       endif
    endif
    call vvcs#log#startCommand('VcUp')
-   let ret = vvcs#remote#execute('up', path)
+   let ret = vvcs#remote#execute('up', path, a:overwrite)
    if !empty(ret['error'])
       call vvcs#log#commandFailed('VcUp')
    endif
    call vvcs#log#commandSucceed('VcUp')
 endfunction
 
-function! vvcs#down(autoread, ...) " {{{1
+function! vvcs#down(overwrite, autoread, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Retrieve files on specified path (default: current file) from the remote
 " machine.
@@ -42,7 +42,7 @@ function! vvcs#down(autoread, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    call vvcs#log#startCommand('VcDown')
    let path = a:0 ? a:1 : expand("%:p")
-   let ret = vvcs#remote#execute('down', path)
+   let ret = vvcs#remote#execute('down', path, a:overwrite)
    if !empty(ret['error'])
       call vvcs#log#commandFailed('VcDown')
       return 0

@@ -8,9 +8,12 @@ endif
 let g:loaded_vvcs = 1
 
 " Commands {{{1
-command! -bar -complete=file -nargs=? VcUp call vvcs#up(<f-args>)
+command! -bar -complete=file -nargs=? VcUp call vvcs#up(0, <f-args>)
+command! -bar -complete=file -nargs=? VcUpOverwrite call vvcs#up(1, <f-args>)
 command! -bar -bang -complete=file -nargs=? VcDown 
-         \ call vvcs#down(<bang>0, <f-args>)
+         \ call vvcs#down(0, <bang>0, <f-args>)
+command! -bar -bang -complete=file -nargs=? VcDownOverwrite
+         \ call vvcs#down(1, <bang>0, <f-args>)
 command! -bar -nargs=0 VcDiff call vvcs#diff()
 command! -bar -bang -nargs=0 VcCheckout 
          \ call vvcs#checkout(<bang>0, expand("%:p"))

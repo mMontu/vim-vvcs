@@ -46,17 +46,17 @@ endfunction
 let g:vvcs#remote#op = {}
 let g:vvcs#remote#op['ClearCase'] = { 
    \'up' : {
-         \'args' : ['<path>'],
-         \'cmd': '"rsync -azvuC ".s:rsyncExcludePat()." <path> -e ssh ".
-            \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
-            \ g:vvcs_remote_mark."<path>"',
+         \'args' : ['<path>', '<overw:>'],
+         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C ".s:rsyncExcludePat().
+            \ " <path> -e ssh ".g:vvcs_remote_host.":/view/".
+            \ g:vvcs_remote_branch."/".g:vvcs_remote_mark."<path>"',
          \'localCommand' : '',
    \},
    \'down' : {
-         \'args' : ['<path>'],
-         \'cmd': '"rsync -azvuC ".s:rsyncExcludePat()." -e ssh ".
-            \ g:vvcs_remote_host.":/view/".g:vvcs_remote_branch."/".
-            \ g:vvcs_remote_mark."<path> <path>"',
+         \'args' : ['<path>', '<overw:>'],
+         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C ".s:rsyncExcludePat().
+            \ " -e ssh ".g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.
+            \ "/".g:vvcs_remote_mark."<path> <path>"',
          \'localCommand' : '',
    \},
    \'pred' : {
@@ -102,15 +102,16 @@ let g:vvcs#remote#op['ClearCase'] = {
 " information (it is not present on 'svn info' of svn version 1.6.11)
 let g:vvcs#remote#op['svn'] = { 
    \'up' : {
-         \'args' : ['<path>'],
-         \'cmd': '"rsync -azvuC ".s:rsyncExcludePat()." <path> -e ssh ".
-            \ g:vvcs_remote_host.":".g:vvcs_remote_mark."<path>"',
-         \'localCommand' : '',
+         \'args' : ['<path>', '<overw:>'],
+         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C  ".s:rsyncExcludePat().
+         \" <path> -e ssh ".  g:vvcs_remote_host.":".g:vvcs_remote_mark.
+         \"<path>"', 'localCommand' : '',
    \},
    \'down' : {
-         \'args' : ['<path>'],
-         \'cmd': '"rsync -azvuC ".s:rsyncExcludePat()." -e ssh ".
-            \ g:vvcs_remote_host.":".g:vvcs_remote_mark."<path> <path>"',
+         \'args' : ['<path>', '<overw:>'],
+         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C ".s:rsyncExcludePat().
+            \" -e ssh ".g:vvcs_remote_host.":".g:vvcs_remote_mark.
+            \"<path> <path>"',
          \'localCommand' : '',
    \},
    \'pred' : {
@@ -182,6 +183,11 @@ function! vvcs#remote#execute(key, ...) " {{{1
             return ret
          endif
          let cmd = substitute(cmd, g:vvcs_remote_mark . par, remPath, 'g')
+      endif
+      if par =~ ':'
+         let parPattern = substitute(par, ':', ':\\([^>]*\\)', '')
+         let cmd = substitute(cmd, parPattern, 
+                  \ '\=eval(substitute(submatch(1), "v:val", val, ""))', 'g')
       endif
       let cmd = substitute(cmd, par, val, 'g')
       if exists("l:message")

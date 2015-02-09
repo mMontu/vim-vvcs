@@ -70,6 +70,12 @@ COMMANDS                                                        *vvcs-commands*
                         This is also true when the file is contained in
                         |g:vvcs_project_log| directory.
 
+                                                        *:VcUpOverwrite*
+                                                        *:VcDownpOverwrite*
+:VcUpOverwrite
+:VcDownOverwrite        Similar to |VcUp| and |VcDown|, but overwrite newer
+                        files on the destination.
+
                                                                      *:VcDiff*
 :VcDiff                 Open a new tab page displaying the diff between the
                         current file and its previous version. The following
@@ -274,6 +280,10 @@ args            its value is a list of named arguments the command expects.
                 expanded to its full path before is is used; when it is
                 immediately preceded by `g:vvcs_remote_mark` it is converted
                 to the equivalent remote path (see |g:vvcs_fix_path|).
+                It is possible to include an special evaluation when including
+                an argument: '<paramName:expr>' is replaced by 'eval(expr)',
+                and occurrences of v:val inside expr are replace with the
+                parameter value.
 
 cmd             its value is a string containing the command to be executed on
                 the remote machine. Note that the cmd value has an extra

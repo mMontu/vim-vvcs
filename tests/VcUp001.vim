@@ -12,6 +12,14 @@ VcUp
 call vvcs#log#open()
 call EchoAllWindows()
 
+echomsg '>> Test successful invocation without arguments overwriting'
+call vvcs#log#clear()
+edit AuxFiles/readWrite.h 
+VcUpOverwrite
+" check the contents of the log
+call vvcs#log#open()
+call EchoAllWindows()
+
 echomsg '>> Test successful invocation with arguments'
 call vvcs#log#clear()
 VcUp AuxFiles/readOnly.h
