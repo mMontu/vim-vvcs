@@ -158,8 +158,21 @@ function! s:compareItem(listItem) " {{{1
 
    if item !~ ';'
       " single file specified
-      let file[0].cmd = "call s:setCurrentLine(".
-               \ "vvcs#remote#execute('pred', '". item."')['value'])"
+      if isdirectory(item)
+         call vvcs#log#msg("no diff for directory")
+         return
+      endif
+      " when retrieving the previous version fails just close the log window,
+      " place the message on the OLD window and disable diff, as this is
+      " expected when the file is first included on the VCS
+      let file[0].cmd = 
+               \ "let ret  = vvcs#remote#execute('pred','". item."')|".
+               \ 'let content = ret["value"] |'.
+               \ 'if !empty(ret["error"]) |'.
+               \ '   quit |' .
+               \ '   let noDiff = 1 |'.
+               \ 'endif |'.
+               \ 'call s:setCurrentLine(content)'
       let file[0].name = fnamemodify(item, ":t")
       let file[1].cmd = 'silent edit '.item
    else
@@ -198,7 +211,7 @@ function! s:compareItem(listItem) " {{{1
       " endif
       " trigger autocmd to detect filetype and execute any filetype plugins
       silent doautocmd BufNewFile
-      if line('$') > 1 || getline(1) != ''
+      if !exists("noDiff") && (line('$') > 1 || getline(1) != '')
          " check before 'diffthis' to avoid redraw problem when file is empty
          diffthis
       endif

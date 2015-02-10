@@ -45,8 +45,13 @@ checkoutOk.h contents
 >> Test failure due to invalid remote path
 !.*"AuxFiles[\\/]invalidDir.h".*!
 
+echo window 1:
+
+nodiff
 /.*cleartool: Error: Unable to access "/AuxFiles/invalidDir\.h": No such file or directory\./
 
-  diff
+echo window 2:
+
+nodiff
 invalidDir.h contents
 
