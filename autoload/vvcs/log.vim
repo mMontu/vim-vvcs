@@ -7,6 +7,7 @@ set cpo&vim
 
 " constants {{{1
 let s:PLUGIN_TAG = '[vvcs] '
+let s:MAX_ARG_LENGTH = 60
 
 " variables {{{1
 let s:currentCmd = ''
@@ -34,9 +35,11 @@ function! vvcs#log#msg(msg) " {{{1
    call vvcs#log#append(['>>> Msg <<<', a:msg])
 endfunction
 
-function! vvcs#log#startCommand(cmd) " {{{1
+function! vvcs#log#startCommand(cmd, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Output start command indication to display and log file. 
+" Output start command indication to display and log file. A second argument
+" containg additional information about the command (as its argument) is
+" included on the message if supplied.
 "
 " As some commands may use another VVCS commmands on their implementation,
 " further calls to this method are ignored until the next call to either
@@ -47,21 +50,38 @@ function! vvcs#log#startCommand(cmd) " {{{1
       return
    endif
    let s:currentCmd = a:cmd
+   let cmd = a:cmd
+   if a:0
+      if len(a:1) <= s:MAX_ARG_LENGTH
+         let cmd .= ' '.a:1
+      else
+         " remove start of the argument to avoid the hit-enter prompt
+         let cmd .= ' ...'.substitute(a:1, '\v.{-}(.{,'.s:MAX_ARG_LENGTH.
+                  \ '})$', '\1', '')
+      endif
+   else
+      let cmd .= '...'
+   endif
    echohl Directory
-   echo s:PLUGIN_TAG.a:cmd.'...'
+   echo s:PLUGIN_TAG.cmd
    echohl None
-   call vvcs#log#append(['>>> '.a:cmd.' <<<'])
+   call vvcs#log#append(['>>> '.cmd.' <<<'])
 endfunction
 
-function! vvcs#log#commandSucceed(cmd) " {{{1
+function! vvcs#log#commandSucceed(cmd, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Output command result to display and log file, but only if a:cmd is the main
 " running command (which is specified on the first vvcs#log#startCommand()).
+" A second argument containg additional information about the command (as its
+" argument) is included on the message if supplied.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    if a:cmd ==# s:currentCmd
       let s:currentCmd = ''
       redraw " clear previous messages
       let msg = a:cmd.' done'
+      if a:0 && !empty(a:1)
+         let msg .= ' ('.a:1.')'
+      endif
       echohl Question
       echo s:PLUGIN_TAG.msg
       echohl None

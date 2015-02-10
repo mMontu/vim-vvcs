@@ -15,7 +15,7 @@ nodiff
 Error 1
 /\d\+:\d\+:\d\+: >>> Msg <<</
 Msg 1
-/\d\+:\d\+:\d\+: >>> Cmd 1 <<</
+/\d\+:\d\+:\d\+: >>> Cmd 1... <<</
 /\d\+:\d\+:\d\+: >>> Cmd 1 done <<</
 /\d\+:\d\+:\d\+: Cmd log line 1/
 Cmd log line 2
@@ -41,6 +41,28 @@ echo window 2:
 "[No Name]" --No lines in buffer--
 nodiff
 <empty file>
+
+
+>> Check additional verbose of startCommand and commandSucceed
+
+[vvcs] Cmd 1 param
+[vvcs] Cmd 1 done (resultInfo)
+
+<EchoAllWindows: 2>
+echo window 1:
+
+/"AuxFiles[/\\]\.cache[/\\]vvcs[/\\]\+log[/\\]\d\+[/\\]\d\+[/\\]\d\+\.log".*/
+
+nodiff
+/\d\+:\d\+:\d\+: >>> Cmd 1 param <<</
+/\d\+:\d\+:\d\+: >>> Cmd 1 done (resultInfo) <<</
+
+echo window 2:
+
+"[No Name]" --No lines in buffer--
+nodiff
+<empty file>
+
 
 >> Check that log is disable when vvcs_log_location is empty
 [vvcs] Error 1

@@ -47,14 +47,16 @@ let g:vvcs#remote#op = {}
 let g:vvcs#remote#op['ClearCase'] = { 
    \'up' : {
          \'args' : ['<path>', '<overw:>'],
-         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C ".s:rsyncExcludePat().
+         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C --stats ".
+            \ s:rsyncExcludePat().
             \ " <path> -e ssh ".g:vvcs_remote_host.":/view/".
             \ g:vvcs_remote_branch."/".g:vvcs_remote_mark."<path>"',
          \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>', '<overw:>'],
-         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C ".s:rsyncExcludePat().
+         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C --stats ".
+            \ s:rsyncExcludePat().
             \ " -e ssh ".g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.
             \ "/".g:vvcs_remote_mark."<path> <path>"',
          \'localCommand' : '',
@@ -103,13 +105,16 @@ let g:vvcs#remote#op['ClearCase'] = {
 let g:vvcs#remote#op['svn'] = { 
    \'up' : {
          \'args' : ['<path>', '<overw:>'],
-         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C  ".s:rsyncExcludePat().
-         \" <path> -e ssh ".  g:vvcs_remote_host.":".g:vvcs_remote_mark.
-         \"<path>"', 'localCommand' : '',
+         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C --stats ".
+            \ s:rsyncExcludePat().
+            \" <path> -e ssh ".  g:vvcs_remote_host.":".g:vvcs_remote_mark.
+            \"<path>"', 
+         \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>', '<overw:>'],
-         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C ".s:rsyncExcludePat().
+         \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C --stats ".
+            \s:rsyncExcludePat().
             \" -e ssh ".g:vvcs_remote_host.":".g:vvcs_remote_mark.
             \"<path> <path>"',
          \'localCommand' : '',

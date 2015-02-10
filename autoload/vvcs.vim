@@ -16,7 +16,7 @@ function! vvcs#up(overwrite, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Send files on specified path (default: current file) to the remote machine.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let path = a:0 ? a:1 : expand("%:p")
+   let path = a:0 ? fnamemodify(a:1, ":p") : expand("%:p")
    if vvcs#utils#isProjectLogFile(path)
       if VvcsConfirm("This seems to be a log file, thus it shouldn't be ".
                \ "edited locally.\nProceed sending it to ".
@@ -24,12 +24,14 @@ function! vvcs#up(overwrite, ...) " {{{1
          return
       endif
    endif
-   call vvcs#log#startCommand('VcUp')
+   call vvcs#log#startCommand('VcUp', path)
    let ret = vvcs#remote#execute('up', path, a:overwrite)
    if !empty(ret['error'])
       call vvcs#log#commandFailed('VcUp')
    endif
-   call vvcs#log#commandSucceed('VcUp')
+   call vvcs#log#commandSucceed('VcUp', substitute(ret['value'], 
+            \ '\v.*files transferred: (\d+).*', 
+            \ '\=submatch(1)." file".(submatch(1) == 1 ? "" : "s")', ''))
 endfunction
 
 function! vvcs#down(overwrite, autoread, ...) " {{{1
@@ -40,8 +42,8 @@ function! vvcs#down(overwrite, autoread, ...) " {{{1
 " single file is specified then it is reloaded without confirmation.
 " Return true if succeeds.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   call vvcs#log#startCommand('VcDown')
-   let path = a:0 ? a:1 : expand("%:p")
+   let path = a:0 ? fnamemodify(a:1, ":p") : expand("%:p")
+   call vvcs#log#startCommand('VcDown', path)
    let ret = vvcs#remote#execute('down', path, a:overwrite)
    if !empty(ret['error'])
       call vvcs#log#commandFailed('VcDown')
@@ -61,7 +63,9 @@ function! vvcs#down(overwrite, autoread, ...) " {{{1
    if restoreBuf
       call setbufvar(bufNum, "&autoread", 0)
    endif
-   call vvcs#log#commandSucceed('VcDown')
+   call vvcs#log#commandSucceed('VcDown', substitute(ret['value'], 
+            \ '\v.*files transferred: (\d+).*', 
+            \ '\=submatch(1)." file".(submatch(1) == 1 ? "" : "s")', ''))
    return 1
 endfunction
 
