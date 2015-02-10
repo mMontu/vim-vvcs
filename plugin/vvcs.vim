@@ -93,6 +93,9 @@ endif
 if !exists("g:vvcs_project_log")
    let g:vvcs_project_log = ''
 endif
+if !exists("g:vvcs_default_arg")
+   let g:vvcs_default_arg = 'expand("%:p")'
+endif
 
 function! VvcsSystem(expr) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

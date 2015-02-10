@@ -16,7 +16,7 @@ function! vvcs#up(overwrite, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Send files on specified path (default: current file) to the remote machine.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let path = a:0 ? fnamemodify(a:1, ":p") : expand("%:p")
+   let path = fnamemodify((a:0 ? a:1 : eval(g:vvcs_default_arg)), ":p")
    if vvcs#utils#isProjectLogFile(path)
       if VvcsConfirm("This seems to be a log file, thus it shouldn't be ".
                \ "edited locally.\nProceed sending it to ".
@@ -42,7 +42,7 @@ function! vvcs#down(overwrite, autoread, ...) " {{{1
 " single file is specified then it is reloaded without confirmation.
 " Return true if succeeds.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let path = a:0 ? fnamemodify(a:1, ":p") : expand("%:p")
+   let path = fnamemodify((a:0 ? a:1 : eval(g:vvcs_default_arg)), ":p")
    call vvcs#log#startCommand('VcDown', path)
    let ret = vvcs#remote#execute('down', path, a:overwrite)
    if !empty(ret['error'])
