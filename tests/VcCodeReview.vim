@@ -53,6 +53,21 @@ call EchoAllWindows()
 normal q
 normal q
 
+"""""""""""""""""""""""""""""""""""""""""
+"  one window split to another tabpage  "
+"""""""""""""""""""""""""""""""""""""""""
+echomsg ">> one window split to another tabpage"
+let g:inputStub['list to review'] = "AuxFiles/ReviewList1"
+VcCodeReview
+wincmd w
+tab vs
+tabprevious
+wincmd p
+exe "normal \<cr>"
+call EchoAllWindows()
+normal q
+
+
 """"""""""""""""""""""""""""""""""""""""
 "  check if any register was changed   "
 """"""""""""""""""""""""""""""""""""""""

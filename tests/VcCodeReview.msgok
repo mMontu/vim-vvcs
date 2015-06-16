@@ -211,4 +211,27 @@ AuxFiles/readWrite.h@@/main/myBranch/40
 AuxFiles/checkoutOk.h@@/main/myBranch/60 ; AuxFiles/checkoutOk.h@@/main/myBranch/65
 
 
+>> one window split to another tabpage
+
+echo window 1:
+
+/"OLD (1) AuxFiles[\\/]readOnly.h".*/
+  diff
+AuxFiles/readOnly.h@@/main/myBranch/0 contents
+
+echo window 2:
+
+/"NEW AuxFiles[\\/]readOnly.h".*/
+  diff
+AuxFiles/readOnly.h@@/main/myBranch/1 contents
+
+echo window 3:
+
+/"AuxFiles[\\/]ReviewList1".*/
+nodiff
+ 
+AuxFiles/readOnly.h@@/main/myBranch/1
+
+
+Quit comparison?
 

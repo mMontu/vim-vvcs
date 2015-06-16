@@ -204,7 +204,8 @@ function! s:compareItem(listItem) " {{{1
          setlocal modifiable
          call s:commonMappings()
       " endif
-      exe 'silent file '.s:VVCS_CODE_REVIEW_DIFF_LABEL[i].'\ '. file[i].name
+      exe 'silent file '.
+               \ s:getTempFileName(s:VVCS_CODE_REVIEW_DIFF_LABEL[i], file[i].name)
       exe file[i].cmd
       " if &buftype != 'nofile'
          let t:compareFile[i].bufNr = bufnr('%') " bufNr changes if cmd is edit
@@ -334,6 +335,23 @@ function! s:setCurrentLine(content) " {{{1
    silent '[-1delete _
 endfunction
 
+function! s:getTempFileName(prefix, currentName) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Return the name for a temporary file, suitable for :file command.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let name = a:prefix.' '.a:currentName
+
+   " check if the name is already in used
+   let i = 1
+   while buflisted(name)
+      let name = a:prefix.' ('.i.') '.a:currentName
+      let i += 1
+   endw
+
+   " escape spaces for :file command
+   let name = substitute(name, ' ', '\\&', 'g')
+   return name
+endfunction
 
 let &cpo = save_cpo
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :
