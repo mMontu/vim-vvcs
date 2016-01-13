@@ -21,6 +21,7 @@ command! -nargs=0 VcCodeReview call vvcs#codeReview()
 command! -nargs=0 VcListCheckedout call vvcs#listCheckedOut()
 command! -nargs=0 VcGetRemotePath call vvcs#getRemotePath()
 command! -nargs=0 VcLog call vvcs#log#open()
+command! -bar -complete=file -nargs=? VcMake call vvcs#make(<f-args>)
 
 " Mappings {{{1
 if !hasmapto('<Plug>VcUp')
@@ -58,6 +59,11 @@ if !hasmapto('<Plug>VcGetRemotePath')
 endif
 noremap <unique> <Plug>VcGetRemotePath :VcGetRemotePath<CR>
 
+if !hasmapto('<Plug>VcMake')
+   map <unique> <leader>vm <Plug>VcMake
+endif
+noremap <unique> <Plug>VcMake :VcMake<CR>
+
 " Options {{{1
 if !exists("g:vvcs_remote_vcs")
    let g:vvcs_remote_vcs = "<select_vvcs_remote_vcs>"
@@ -93,9 +99,13 @@ endif
 if !exists("g:vvcs_project_log")
    let g:vvcs_project_log = ''
 endif
-if !exists("g:vvcs_default_arg")
-   let g:vvcs_default_arg = 'expand("%:p")'
+if !exists("g:vvcs_default_path")
+   let g:vvcs_default_path = 'expand("%:p")'
 endif
+if !exists("g:vvcs_make_cmd")
+   let g:vvcs_make_cmd = 'make'
+endif
+
 
 function! VvcsSystem(expr) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

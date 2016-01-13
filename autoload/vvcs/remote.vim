@@ -64,7 +64,7 @@ let g:vvcs#remote#op['ClearCase'] = {
    \'pred' : {
          \'args' : ['<filepath>'],
          \'cmd':  '"cat ".g:vvcs_remote_mark.
-            \"<filepath>@@\`cleartool descr -pred -short ".g:vvcs_remote_mark.
+            \"<filepath>@@\\`cleartool descr -pred -short ".g:vvcs_remote_mark.
             \"<filepath>\\`"',
          \'silent' : '',
          \'message' : 'retrieving previous version of <filepath> ...',
@@ -132,6 +132,13 @@ let g:vvcs#remote#op['svn'] = {
          \'message' : 'retrieving file list ...',
          \'adjust': 'vvcs#remote#toLocalPath('
                \ .'substitute(v:val, ''\v^\S\s*'', "", "g"))',
+   \},
+   \'make' : {
+         \'args' : ['<path>'],
+         \'cmd':  '"cd ".g:vvcs_remote_mark."<path> && ".g:vvcs_make_cmd',
+         \'silent' : '',
+         \'message' : 'building <path> ...',
+         \'dryRun' : '',
    \},
 \}
 
@@ -210,7 +217,12 @@ function! vvcs#remote#execute(key, ...) " {{{1
    if has_key(operation[a:key], 'message')
       call vvcs#log#msg(message)
    endif
-   let ret['value'] = VvcsSystem(cmd)
+   if has_key(operation[a:key], 'dryRun')
+      let ret['value'] = cmd
+      return ret
+   else
+      let ret['value'] = VvcsSystem(cmd)
+   endif
    if has_key(operation[a:key], 'filter')
       let ret['value'] = join(filter(split(ret['value'], "\n"), 
                \ operation[a:key]['filter']), "\n")

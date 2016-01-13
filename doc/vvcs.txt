@@ -44,7 +44,7 @@ COMMANDS                                                        *vvcs-commands*
 
                                                                         *:VcUp*
 :VcUp [path]            Send the files on specified path to remote machine. If
-                        no path is specified it acts on |g:vvcs_default_arg|.
+                        no path is specified it acts on |g:vvcs_default_path|.
 
                         For ClearCase this synchronization is performed on
                         /view/view_1/vobs/.../, which is faster than ssh to
@@ -58,7 +58,7 @@ COMMANDS                                                        *vvcs-commands*
                                                                      *:VcDown*
 :VcDown[!] [path]       Retrieve the files on specified path from the remote
                         machine. If no path is specified it acts on
-                        |g:vvcs_default_arg|. See |:VcUp| for details on the
+                        |g:vvcs_default_path|. See |:VcUp| for details on the
                         synchronization.
 
                         When [!] is included and a single file is specified it
@@ -125,6 +125,15 @@ COMMANDS                                                        *vvcs-commands*
                                                                      *:VcLog*
 :VcLog                  Display the plugin log file.
 
+                                                                     *:VcMake*
+:VcMake [path] **TODO** Run |VcUp| on the specified path, then execute the
+                        commands on |g:vvcs_make_cmd| on the remote machine at
+                        the specified path and display the results on the
+                        |quickfix|.
+
+                        |g:vvcs_default_path| is used when no path is
+                        specified.
+
 ==============================================================================
 KEY MAPPINGS                                                    *vvcs-mappings*
 
@@ -137,6 +146,7 @@ By default, vvcs adds the following mappings:
    <leader>vc              <Plug>VcCodeReview
    <leader>vl              <Plug>VcListCheckedout
    <leader>vg              <Plug>VcGetRemotePath
+   <leader>vm              <Plug>VcMake
 
 ==============================================================================
 OPTIONS                                                         *vvcs-options*
@@ -240,19 +250,30 @@ files retrieved with |VcDown| or to warn when trying to send a log file with
    let g:vvcs_project_log = '/vobs/proj1/logs'
 <
 
-                                                        *'g:vvcs_default_arg'*
+                                                        *'g:vvcs_default_path'*
 This option is used as the default for some commands (e.g.: |VcUp|). It is
 used after it is passed to |eval()|, thus it requires extra quoting. The
 default value is the current file: >
 
-   let g:vvcs_default_arg = 'expand("%:p")'
+   let g:vvcs_default_path = 'expand("%:p")'
 <
 It is possible to select different values depending on the file being edited.
 In order to use the current directory to all files except those on the log
 directory (|g:vvcs_project_log|): >
 
-   let g:vvcs_default_arg = 'vvcs#utils#isProjectLogFile(expand("%")) ? '.
+   let g:vvcs_default_path = 'vvcs#utils#isProjectLogFile(expand("%")) ? '.
       \ 'expand("%:p") : expand("%:p:h")' 
+<
+
+                                                        *'g:vvcs_make_cmd'*
+Specifies the command used by |VcMake|: >
+
+   let g:vvcs_make_cmd = 'make'
+<
+It may be used to further change the working directory, in order to allow the
+automatic VcUp to be used on a broader path: >
+
+   let g:vvcs_make_cmd = 'cd Debug && make all'
 <
 
 ==============================================================================
@@ -314,7 +335,7 @@ localCommand    by default the string in cmd is executed on the remote machine
                 through the expansion in |g:vvcs_remote_cmd|. This key can be
                 used for commands that may run faster directly in the local
                 machine (e.g. 'rsync <local> <remote>' instead of 
-                'ssh <remote> "<setupCmd>; rsync <remote> <local>"'.
+                'ssh <remote> "<setupCmd>; rsync <remote> <local>"').
 
 message         display its value as a message to the user before executing
                 the command. It may contain elements of the "args" key, which
@@ -345,16 +366,16 @@ Example: >
                   \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
       \}
 <
-The command 'ct lsco ... ' is used in ClearCase to retrieve the list of file
-currently checked-out; its output is on the following format: >
+   The command 'ct lsco ... ' is used in ClearCase to retrieve the list of
+   file currently checked-out; its output is on the following format: >
 
    27-Aug.14:02 user  checkout version "/path1/myFile" from /vers/3 (unreserved)
    27-Aug.15:08 user  checkout version "/path2/filex" from /vers/2 (unreserved)
 <
-The result from remote command is split in '\n', then the substitute acts on
-each line of the result (|v:val|) in order to remove the unnecessary
-information, then vvcs#remove#toLocalPath() is used to convert the path to the
-local filesystem (|g:vvcs_fix_path|).
+   The result from remote command is split in '\n', then the substitute acts
+   on each line of the result (|v:val|) in order to remove the unnecessary
+   information, then vvcs#remove#toLocalPath() is used to convert the path to
+   the local filesystem (|g:vvcs_fix_path|).
 
 ==============================================================================
 ABOUT                                                           *vvcs-about*

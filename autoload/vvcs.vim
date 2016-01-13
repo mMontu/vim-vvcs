@@ -14,9 +14,10 @@ let s:VVCS_LIST_CHECKEDOUT_FILE = "listCheckedout.review"
 
 function! vvcs#up(overwrite, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Send files on specified path (default: current file) to the remote machine.
+" Send files on specified path (default: g:vvcs_default_path) to the remote
+" machine.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let path = fnamemodify((a:0 ? a:1 : eval(g:vvcs_default_arg)), ":p")
+   let path = fnamemodify((a:0 ? a:1 : eval(g:vvcs_default_path)), ":p")
    if vvcs#utils#isProjectLogFile(path)
       if VvcsConfirm("This seems to be a log file, thus it shouldn't be ".
                \ "edited locally.\nProceed sending it to ".
@@ -36,13 +37,13 @@ endfunction
 
 function! vvcs#down(overwrite, autoread, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Retrieve files on specified path (default: current file) from the remote
-" machine.
+" Retrieve files on specified path (default: g:vvcs_default_path) from the
+" remote machine.
 " If a:autoread is set (or the file is in g:vvcs_project_log path) and a
 " single file is specified then it is reloaded without confirmation.
 " Return true if succeeds.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let path = fnamemodify((a:0 ? a:1 : eval(g:vvcs_default_arg)), ":p")
+   let path = fnamemodify((a:0 ? a:1 : eval(g:vvcs_default_path)), ":p")
    call vvcs#log#startCommand('VcDown', path)
    let ret = vvcs#remote#execute('down', path, a:overwrite)
    if !empty(ret['error'])
@@ -86,7 +87,7 @@ function! vvcs#checkout(autoread, file) " {{{1
    call vvcs#log#startCommand('VcCheckout')
    let ret = vvcs#remote#execute('checkout', a:file)
    if empty(ret['error'])
-      if vvcs#down(a:autoread || (&readonly && !&modified), a:file)
+      if vvcs#down(1, a:autoread || (&readonly && !&modified), a:file)
          call vvcs#log#commandSucceed('VcCheckout')
          return
       endif
@@ -237,6 +238,51 @@ function! vvcs#getRemotePath() " {{{1
    let remPath = vvcs#remote#toRemotePath(expand("%:p"))
    let @+ = remPath
    call vvcs#log#msg('VcGetRemotePath: '.remPath)
+endfunction
+
+function! vvcs#make(...) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Execute a build at specified path (default: g:vvcs_default_path) on the
+" remote machine.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let path = fnamemodify((a:0 ? a:1 : eval(g:vvcs_default_path)), ":p")
+   exe "VcUp ".path
+   call vvcs#log#startCommand('VcMake', path)
+   let makeprgSave = &makeprg
+   let &makeprg = vvcs#remote#execute('make', path)['value']
+   echom "&makeprg = ".&makeprg
+   " XXX how to handle the different paths for VcUp and make? extracting 'cd
+   " path' from g:vvcs_make_cmd may not work if it refers to a directory that
+   " is only present at remote directory 
+   " maybe it is better to change vvcs_default_path to vvcs_sync_path, and
+   " create a vvcs_make_path - make cd to vvcs_make_path, run make, then
+   " cd to the previous dir
+   " maybe don't change the current dir on vim, just pass the path to
+   " remote#execute(..., 'dryRun')
+   cd Debug
+   pwd
+   " it is easier to fill the quickfix using make; it also has the advantage
+   " of displaying the regular behavior of a make (triggering autocmds, etc)
+   " XXX XXX XXX this works only if "augroup changeQfCmdDir" is disabled
+   make
+   let &makeprg = makeprgSave
+   " XXX echom "ret['value'] = ".ret['value']
+   " XXX if !empty(ret['error'])
+   " XXX    quit " close the log window
+   " XXX endif
+   " XXX " based on  https://github.com/MarcWeber/vim-addon-qf-layout
+   " XXX copen
+   " XXX setl modifiable
+   " XXX %delete
+   " XXX call append(1, split(ret['value'], "\n"))
+  
+   " XXX maybe call make directly here, either replicating part of remote.vim
+   " here in order to include the ssh command, or include an extra key on the
+   " dictionary (dry-run) in order to return the command without executing;
+   " It maybe necessary to execute the 'cd Debug' at the start of the
+   " g:vvcs_make_cmd in order to find the files from the quickfix
+
+   " XXX maybe copy part from function! MakeMake() on .vimrc
 endfunction
 
 
