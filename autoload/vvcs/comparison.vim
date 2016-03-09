@@ -8,20 +8,131 @@ set cpo&vim
 " constants {{{1
 let s:VVCS_CODE_REVIEW_DIFF_LABEL = ['OLD', 'NEW']
 
-
-function! vvcs#comparison#createSingle(files) " {{{1
+" g:vvcs#comparison#get dictionary {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Create a new tab with two windows and display the diff of files specified in
-" the string a:files, which can be:
+" common (local) tasks for each version control system
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:vvcs#comparison#get = {}
+let g:vvcs#comparison#get.ClearCase = {}  " {{{2
+function! g:vvcs#comparison#get['ClearCase'].pathAndVersion(index, list) dict
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Return a pair of path@version for the line on a list of files. 
 "
-"  * two filenames separeted by a semi-colon
+" Each line on the list may contain:
+"
+"  * two filenames separeted by a semi-colon (TODO: or spaces)
 "  * a single filename without version specified -- on this case it will be
 "     compared against the previous version based on the current branch/config
 "     spec
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let item = a:list[a:index]
+   if isdirectory(vvcs#remote#toLocalPath(item))
+      return [] " no diff for directories
+   endif
+
+   let ret = []
+   if item =~ ';'
+      " two files specified
+      let splitItem = split(item, '\s*;\s*')
+      if len(splitItem) != 2
+         return ['error: invalid number of files: '.len(splitItem)]
+      else
+         let ret = splitItem
+      endif
+   else  " item !~ ';'
+      if item =~ "@@"
+         let [path, rev] = split(item, '@@')
+         let rev = '@@'.rev
+      else
+         let [path, rev] = [item, '']
+      endif
+      " remote command info expects remote path and possible version identifier
+      if filereadable(path)
+         let path = vvcs#remote#toRemotePath(path)
+         " call vvcs#log#msg("converted path: ".path)
+      endif
+      call add(ret, path."@@".vvcs#remote#execute('info', path.rev, 1)['value'])
+      call add(ret, path."@@".vvcs#remote#execute('info', path.rev, 0)['value'])
+   endif
+
+   return ret
+endfunction
+
+let g:vvcs#comparison#get.svn = {}  " {{{2
+function! g:vvcs#comparison#get['svn'].pathAndVersion(index, list) dict
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Return a pair of path@version for the line on a list of files. 
+"
+" The list may contains:
+"
+"  * no branch/revision specified: shows diff between the current and previous
+"     version on the working copy
+"  * file name(s) followed by branch/revision identification on separated
+"     lines
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   let item = a:list[a:index]
+   if isdirectory(vvcs#remote#toLocalPath(item))
+      return [] " no diff for directories
+   endif
+
+   let ret = []
+   
+   let COMMMITED_REV_PAT = '\vCommitted revision\s*(\d+)\..*'
+   let revIdx = vvcs#utils#indexRegex(a:list, COMMMITED_REV_PAT, a:index, 0, 1)
+   let rev = -1
+   if revIdx != -1
+      let rev = substitute(a:list[revIdx], COMMMITED_REV_PAT, '\1', '')
+   endif
+   " call vvcs#log#msg("revision: ".rev)
+
+   if rev != -1
+      " search branch
+      let BRANCH_PAT = '\vCommitted revision\s*\d+\.\s*(\S+).*'
+      let branchIdx = vvcs#utils#indexRegex(a:list, BRANCH_PAT, a:index, 0, 1)
+      if branchIdx == -1
+         let ret = ['error: unable to determine the branch']
+      else
+         let item = substitute(item, '\v^\s*Sending\s+', '', '')
+         let branch = substitute(a:list[branchIdx], BRANCH_PAT, '\1', '')
+         " call vvcs#log#msg("branch: ".branch)
+         " let item = g:vvcs_remote_repo.'/'.branch.'/'.item.'@'.rev
+         " call add(ret, vvcs#remote#execute('info', item, 1)['value'])
+         " call add(ret, vvcs#remote#execute('info', item, 0)['value'])
+         let item = g:vvcs_remote_repo.'/'.branch.'/'.item
+         call add(ret, item.'@'.(rev-1))
+         call add(ret, item.'@'.rev)
+      endif
+   else  " rev == -1
+      let isCheckedout = 0
+      if filereadable(item)
+         let isCheckedout = vvcs#remote#execute('isCheckedout', item)['value']
+         " info command below expects remote path
+         let item = vvcs#remote#toRemotePath(item)
+         " call vvcs#log#msg("converted path: ".item)
+      endif
+
+      if isCheckedout
+         call add(ret, vvcs#remote#execute('info', item, 0)['value'])
+         call add(ret, item."@checkedout")
+      else
+         call add(ret, vvcs#remote#execute('info', item, 1)['value'])
+         call add(ret, vvcs#remote#execute('info', item, 0)['value'])
+         " NOTE: maybe change the line above to @checkedout to avoid one
+         " 'info' if it becomes too slow; 
+      endif
+   endif
+
+   return ret
+endfunction
+
+function! vvcs#comparison#createSingle(files) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Create a new tab with two windows and display the diff of file specified in
+" the string a:file.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    call s:createDiffWindows()
    let t:compareFile[2].bufNr = -1
-   call s:compareItem(a:files)
+   call s:compareItem(0, [a:files])
 endfunction
 
 function! s:createDiffWindows() " {{{1
@@ -118,10 +229,13 @@ function! s:compareFiles(offset) " {{{1
    exe t:compareFile[2].winNr.'wincmd w'
    call cursor(line('.') + a:offset, 0)
 
-   """""""""""""""""""""""""""""""""
-   "  skip empty and marker lines  "
-   """""""""""""""""""""""""""""""""
-   while getline('.') =~ '\v^\s*%($|'.g:vvcs_review_comment.')'
+   """""""""""""""""""""""""""""""""""""""""""""""""
+   "  skip empty, commented and unimportant lines  "
+   """""""""""""""""""""""""""""""""""""""""""""""""
+   let IGNORE_PAT = ['Committed revision', 'Transmitting file data']
+   let ignore = '('.join(IGNORE_PAT, '|').')'
+   let comment = '('.join(g:vvcs_review_comment, '|').')'
+   while getline('.') =~ '\v^\s*%($|('.ignore.'|'.comment.'))'
       if (a:offset >= 0 && line('.') == line('$')) ||
                \ (a:offset < 0 && line('.') == 1)
          return
@@ -129,81 +243,61 @@ function! s:compareFiles(offset) " {{{1
       call cursor(line('.') + (a:offset >= 0 ? 1 : -1), 0)
    endw
    redraw  " avoid that cursor move outside window
-   let files = substitute(getline('.'), '\s*'.g:vvcs_review_comment.'.*','','')
-   call s:compareItem(files)
+   let files = getline(0, '$') 
+   if g:vvcs_remote_vcs =~# 'ClearCase'
+      let files = map(files, 
+               \ 'substitute(v:val, "\\v\\s*".comment.".*", "", "")')
+   endif
+   call s:compareItem(line('.')-1, files)
    exe initialWindow.'wincmd w'
 endfunction
 
-function! s:compareItem(listItem) " {{{1
+function! s:compareItem(index, list) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Handle a line in the file list. Can be used to peform comparisons when there
-" is no file list.
+" Handle a line in the file list or a single diff 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   " call vvcs#log#msg("index: ".a:index.", list: ".string(a:list))
+   let pathAndVer = g:vvcs#comparison#get[g:vvcs_remote_vcs].pathAndVersion(a:index, a:list)
+   " call vvcs#log#msg("vers: ".string(pathAndVer))
+   " return
+   if empty(pathAndVer)
+      call vvcs#log#msg("no diff to display")
+      return
+   elseif pathAndVer[0] =~# '^error:'
+      call vvcs#log#error(substitute(pathAndVer[0], '^error:\s*', '', ''))
+      return
+   endif
+
    let file = [
             \ {'name' : '', 'cmd' : ''},
             \ {'name' : '', 'cmd' : ''},
    \ ]
-   let item = a:listItem
-
-   if item !~ ';'
-      " Change item containing only '/path/file@@version/N' and replace with
-      " '/path/file@@version/N-1 ; /path/file@@version/N' 
-      let item = substitute(item, '\v^(\s*[^ \t;@]+\@\@[^ \t;]{-})(\d+>)\s*$',
-               \ '\=submatch(1).(submatch(2)-1)." ; ".submatch(1).submatch(2)', 
-               \ "")
-      " TODO: move to a separate dictionary in order to make this code
-      " independent of ClearCase; maybe retrieve it from the remote system, in
-      " order to fix #14
-   endif
-
-   if item !~ ';'
-      " single file specified
-      if isdirectory(item)
-         call vvcs#log#msg("no diff for directory")
-         return
+   for i in range(len(pathAndVer))
+      let splitPath = split(pathAndVer[i], '@\+')
+      if pathAndVer[i] =~ 'checkedout'
+         let file[i].cmd = 'silent edit '.vvcs#remote#toLocalPath(splitPath[0])
+      else
+         " remove the repo identification or use the tail of the file name
+         if splitPath[0] =~ g:vvcs_remote_repo
+            let path = substitute(splitPath[0], g:vvcs_remote_repo, '', '')
+         else
+            let path = fnamemodify(splitPath[0], ":t")
+         endif
+         let versTail = substitute(splitPath[1], '\v.*/([^/]+/[^/]+$)', '\1', '')
+         let file[i].name = "[".versTail."] ".path
+         let file[i].cmd = "call s:setLines(".
+                  \ "vvcs#remote#execute('catVersion', '".pathAndVer[i]."')['value'])"
       endif
-      " when retrieving the previous version fails just close the log window,
-      " place the message on the OLD window and disable diff, as this is
-      " expected when the file is first included on the VCS
-      let file[0].cmd = 
-               \ "let ret  = vvcs#remote#execute('pred','". item."')|".
-               \ 'let content = ret["value"] |'.
-               \ 'if !empty(ret["error"]) |'.
-               \ '   quit |' .
-               \ '   let noDiff = 1 |'.
-               \ 'endif |'.
-               \ 'call s:setCurrentLine(content)'
-      let file[0].name = fnamemodify(item, ":t")
-      let file[1].cmd = 'silent edit '.item
-   else
-      " two files specified
-      let splitItem = split(item, '\s*;\s*')
-      if len(splitItem) != 2
-         call vvcs#log#error('invalid number of files: '.len(splitItem))
-         return
-      endif
-      for i in range(len(splitItem))
-         let file[i].name = substitute(splitItem[i], '@.*','','')
-         let file[i].cmd = "call s:setCurrentLine(".
-                  \ "vvcs#remote#execute('catVersion', splitItem[i])['value'])"
-      endfor
-   endif
+   endfor
 
    diffoff!
    " display the files
    for i in range(2)
       exe t:compareFile[i].winNr.'wincmd w'
-      " always chage the diff buffers to allow comparison between previous
-      " versions of different files
-      " if &buftype == 'nofile'
-      "    setlocal modifiable
-      "    silent 1,$delete _
-      " else
-         enew
-         call s:setTempBuffer()
-         setlocal modifiable
-         call s:commonMappings()
-      " endif
+      enew
+      call s:setTempBuffer()
+      setlocal modifiable
+      call s:commonMappings()
       exe 'silent file '.
                \ s:getTempFileName(s:VVCS_CODE_REVIEW_DIFF_LABEL[i], file[i].name)
       exe file[i].cmd
@@ -316,7 +410,7 @@ function! s:updateWindowNumbers() " {{{1
 endfunction
 
 
-function! s:setCurrentLine(content) " {{{1
+function! s:setLines(content) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Replace the current line with the specified string (which may spam multiple
 " lines).
@@ -352,6 +446,8 @@ function! s:getTempFileName(prefix, currentName) " {{{1
    let name = substitute(name, ' ', '\\&', 'g')
    return name
 endfunction
+
+
 
 let &cpo = save_cpo
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :

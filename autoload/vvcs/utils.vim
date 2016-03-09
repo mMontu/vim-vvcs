@@ -92,6 +92,47 @@ function! vvcs#utils#isProjectLogFile(file) " {{{1
          \ stridx(vvcs#remote#toRemotePath(a:file), g:vvcs_project_log) != -1
 endfunction
 
+function! vvcs#utils#indexRegex(list, regex, ...) " {{{1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Join the built-in functions index() and search(): return the first index on
+" the list which matches the regex:
+"
+"     vvcs#utils#indexRegex({list}, {regex}, [, {start} [, {ic} [, {wrap}]]])
+"
+" The optional parameters ({start} and {ic}) are similar to the use in
+" index(); the search stops at the end of the list, but if {wrap} is given and
+" it is non-zero the search continues from the begging of the list until {start}
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+   if a:0 > 0
+      let start = a:1 >= 0 ? a:1 : (len(a:list) + a:1)
+   else
+      let start = 0
+   endif
+   if a:0 > 1
+      let ic = a:2
+   else
+      let ic = 0
+   endif
+   if a:0 > 2 && start
+      let wrap = a:3
+   else
+      let wrap = 0
+   endif
+
+   " return index(a:list, a:regex, start, ic)
+   let lines = range(start, len(a:list) - 1)
+   if wrap
+      call extend(lines, range(0, start - 1))
+   endif
+
+   for i in lines
+      if (ic && a:list[i] =~? a:regex) ||
+               \ (!ic && a:list[i] =~# a:regex)
+         return i
+      endif
+   endfor
+   return -1
+endfunction
 
 let &cpo = save_cpo
 " vim: ts=3 sts=0 sw=3 expandtab ff=unix foldmethod=marker :

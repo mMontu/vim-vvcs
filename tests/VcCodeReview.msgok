@@ -5,15 +5,15 @@ select file list to review:
 
 echo window 1:
 
-/"OLD AuxFiles[\\/]readOnly.h".*/
+/"OLD \[myBranch/0] readOnly.h".*/
   diff
-AuxFiles/readOnly.h@@/main/myBranch/0 contents
+!.*AuxFiles[\\/]readOnly.h@@/main/myBranch/0 contents!
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]readOnly.h".*/
+/"NEW \[myBranch/1] readOnly.h".*/
   diff
-AuxFiles/readOnly.h@@/main/myBranch/1 contents
+!.*AuxFiles[\\/]readOnly.h@@/main/myBranch/1 contents!
 
 echo window 3:
 
@@ -31,15 +31,15 @@ select file list to review:
 
 echo window 1:
 
-/"OLD AuxFiles[\\/]readOnly.h".*/
+/"OLD \[myBranch/1] readOnly.h".*/
   diff
-AuxFiles/readOnly.h@@/main/myBranch/1 contents
+!AuxFiles[\\/]readOnly.h@@[\\/]main[\\/]myBranch[\\/]1 contents!
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]readOnly.h".*/
+/"NEW \[myBranch/2] readOnly.h".*/
   diff
-AuxFiles/readOnly.h@@/main/myBranch/2 contents
+!AuxFiles[\\/]readOnly.h@@[\\/]main[\\/]myBranch[\\/]2 contents!
 
 echo window 3:
 
@@ -54,15 +54,15 @@ Quit comparison?
 
 echo window 1:
 
-/"OLD AuxFiles[\\/]newFile.h".*/
+/"OLD \[myBranch/0] newFile.h".*/
 nodiff
 <empty file>
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]newFile.h".*/
+/"NEW \[myBranch/1] newFile.h".*/
 nodiff
-AuxFiles/newFile.h@@/main/myBranch/1 contents
+!AuxFiles[\\/]newFile.h@@[\\/]main[\\/]myBranch[\\/]1 contents!
 
 echo window 3:
 
@@ -77,15 +77,15 @@ Quit comparison?
 
 echo window 1:
 
-/"OLD AuxFiles[\\/]readOnly.h".*/
+/"OLD \[myBranch/19] readOnly.h".*/
   diff
-AuxFiles/readOnly.h@@/main/myBranch/19 contents
+!AuxFiles[\\/]readOnly.h@@[\\/]main[\\/]myBranch[\\/]19 contents!
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]readOnly.h".*/
+!"NEW \[myBranch/20] readOnly.h".*!
   diff
-AuxFiles/readOnly.h@@/main/myBranch/20 contents
+!AuxFiles[\\/]readOnly.h@@[\\/]main[\\/]myBranch[\\/]20 contents!
 
 echo window 3:
 
@@ -98,38 +98,17 @@ AuxFiles/readOnly.h@@/main/myBranch/19;AuxFiles/readOnly.h@@/main/myBranch/20
 Quit comparison?
 
 
->> Test invalid input 1
-
-echo window 1:
-
-/"OLD AuxFiles[\\/]newFile.h".*/
-  diff
-AuxFiles/newFile.h@@/main/myBranch/-1 contents
-
-echo window 2:
-
-/"NEW AuxFiles[\\/]newFile.h".*/
-nodiff
-<empty file>
-
-echo window 3:
-
-/"AuxFiles[\\/]ReviewList4".*/
-nodiff
-AuxFiles/newFile.h@@/main/myBranch/0
-
-
 >> simultaneous comparisons: 1st
 
 echo window 1:
 
-/"OLD AuxFiles[\\/]readOnly.h".*/
+!"OLD \[myBranch/55] readOnly.h".*!
   diff
 AuxFiles/readOnly.h@@/main/myBranch/55 contents
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]readOnly.h".*/
+!"NEW \[myBranch/57] readOnly.h".*!
   diff
 AuxFiles/readOnly.h@@/main/myBranch/57 contents
 
@@ -145,15 +124,15 @@ AuxFiles/newFile.h@@/main/myBranch/2; AuxFiles/newFile.h@@/main/myBranch/10
 
 echo window 1:
 
-/"OLD AuxFiles[\\/]readWrite.h".*/
+!"OLD \[myBranch/39] readWrite.h".*!
   diff
-AuxFiles/readWrite.h@@/main/myBranch/39 contents
+!.*AuxFiles[\\/]readWrite.h@@[\\/]main[\\/]myBranch[\\/]39 contents!
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]readWrite.h".*/
+/"NEW \[myBranch/40] readWrite.h".*/
   diff
-AuxFiles/readWrite.h@@/main/myBranch/40 contents
+!.*AuxFiles[\\/]readWrite.h@@[\\/]main[\\/]myBranch[\\/]40 contents!
 
 echo window 3:
 
@@ -168,15 +147,15 @@ AuxFiles/checkoutOk.h@@/main/myBranch/60 ; AuxFiles/checkoutOk.h@@/main/myBranch
 
 echo window 1:
 
-/"OLD AuxFiles[\\/]newFile.h".*/
+/"OLD \[myBranch/2] newFile.h".*/
   diff
-AuxFiles/newFile.h@@/main/myBranch/2 contents
+!.*AuxFiles[\\/]newFile.h@@[\\/]main[\\/]myBranch[\\/]2 contents!
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]newFile.h".*/
+/"NEW \[myBranch/10] newFile.h".*/
   diff
-AuxFiles/newFile.h@@/main/myBranch/10 contents
+!.*AuxFiles[\\/]newFile.h@@[\\/]main[\\/]myBranch[\\/]10 contents!
 
 echo window 3:
 
@@ -192,15 +171,15 @@ AuxFiles/newFile.h@@/main/myBranch/2; AuxFiles/newFile.h@@/main/myBranch/10
 
 echo window 1:
 
-/"OLD AuxFiles[\\/]checkoutOk.h".*/
+/"OLD \[myBranch/60] checkoutOk.h".*/
   diff
-AuxFiles/checkoutOk.h@@/main/myBranch/60 contents
+!.*AuxFiles[\\/]checkoutOk.h@@[\\/]main[\\/]myBranch[\\/]60 contents!
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]checkoutOk.h".*/
+/"NEW \[myBranch/65] checkoutOk.h".*/
   diff
-AuxFiles/checkoutOk.h@@/main/myBranch/65 contents
+!.*AuxFiles[\\/]checkoutOk.h@@[\\/]main[\\/]myBranch[\\/]65 contents!
 
 echo window 3:
 
@@ -215,15 +194,15 @@ AuxFiles/checkoutOk.h@@/main/myBranch/60 ; AuxFiles/checkoutOk.h@@/main/myBranch
 
 echo window 1:
 
-/"OLD (1) AuxFiles[\\/]readOnly.h".*/
+/"OLD (1) \[myBranch/0] readOnly.h".*/
   diff
-AuxFiles/readOnly.h@@/main/myBranch/0 contents
+!.*AuxFiles[\\/]readOnly.h@@[\\/]main[\\/]myBranch[\\/]0 contents!
 
 echo window 2:
 
-/"NEW AuxFiles[\\/]readOnly.h".*/
+/"NEW \[myBranch/1] readOnly.h".*/
   diff
-AuxFiles/readOnly.h@@/main/myBranch/1 contents
+!.*AuxFiles[\\/]readOnly.h@@[\\/]main[\\/]myBranch[\\/]1 contents!
 
 echo window 3:
 

@@ -7,8 +7,8 @@ set cpo&vim
 
 " constants {{{1
 let s:VVCS_CODE_REVIEW_BROWSE = "codeReviewBrowse" " cache file name
-let s:VVCS_STAGED_MARKER = g:vvcs_review_comment.' Changes staged for commit:'
-let s:VVCS_NOT_STAGED_MARKER = g:vvcs_review_comment.
+let s:VVCS_STAGED_MARKER = g:vvcs_review_comment[0].' Changes staged for commit:'
+let s:VVCS_NOT_STAGED_MARKER = g:vvcs_review_comment[0].
          \ ' Changes not staged for commit:'
 let s:VVCS_LIST_CHECKEDOUT_FILE = "listCheckedout.review" 
 

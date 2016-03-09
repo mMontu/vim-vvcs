@@ -162,17 +162,17 @@ Use this option to indicate the remote host address. >
 
    let g:vvcs_remote_host = 'user@192.168.123.321'
 <
-                                                      *'g:vvcs_remote_branch'*
+                                                      *'g:vvcs_remote_repo'*
 This variable shall be set to the VCS branch used on the remote machine.  >
 
-   let g:vvcs_remote_branch = 'myClearCaseBranch'
+   let g:vvcs_remote_repo = 'myClearCaseBranch'
 <
                                                          *'g:vvcs_remote_cmd'*
 Use this option to indicate how remote commands shall be transmitted: >
 
    let g:vvcs_remote_cmd = 'ssh '.g:vvcs_remote_host.
             \ ' " cleartool setview -login'.
-            \' -exec ''%s'' '.g:vvcs_remote_branch.'"'
+            \' -exec ''%s'' '.g:vvcs_remote_repo.'"'
 <
 This command connects on remote machine through ssh, sets the ClearCase
 view and execute the remote command, which will substitute the `%s` string. It
@@ -352,7 +352,7 @@ filter          some remote commands requires post-processing in order to
                 the second argument of call to |filter()|, in order to remove
                 the lines of the result.
 
-adjust          some remote commands requires post-processing in order to
+adjustLine      some remote commands requires post-processing in order to
                 provide meaningful results. The value of this entry is used as
                 the second argument of call to |map()|, in order to change all
                 the lines of the result.
@@ -362,7 +362,7 @@ Example: >
             \'args' : [],
             \'cmd':  '"ct lsco -avobs -cview"',
             \'message' : 'retrieving list ...',
-            \'adjust': 'vvcs#remote#toLocalPath('
+            \'adjustLine': 'vvcs#remote#toLocalPath('
                   \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
       \}
 <

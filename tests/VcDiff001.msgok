@@ -2,24 +2,23 @@
 
 echo window 2:
 
-/"OLD readOnly.h"\s*line \d of 1.*/
+/"OLD \[readOnly.h_previous] readOnly.h"\s*line \d of 1.*/
   diff
-
-readOnly.h previous contents
+/.*readOnly.h@@readOnly.h_previous contents/
 
 echo window 3:
 
-/"AuxFiles[\\/]readOnly.h".*/
+/"NEW \[readOnly.h] readOnly.h".*/
   diff
-readOnly.h contents
+/.*readOnly.h@@readOnly.h contents/
 
 >> Test successful invocation (last line empty)
 
 echo window 2:
 
-/"OLD readWrite.h"\s*line \d of 2.*/
+/"OLD \[readWrite.h_previous] readWrite.h"\s*line \d of 2.*/
   diff
-readWrite.h previous contents
+/.*readWrite.h@@readWrite.h_previous contents/
 
 echo window 3:
 
@@ -31,16 +30,16 @@ nodiff
 
 echo window 2:
 
-/"OLD checkoutOk.h"\s*line \d of 2.*/
+/"OLD \[checkoutOk.h_previous] checkoutOk.h"\s*line \d of 2.*/
   diff
 
 checkoutOk.h previous contents
 
 echo window 3:
 
-/"AuxFiles[\\/]checkoutOk.h".*/
+/"NEW \[checkoutOk.h] checkoutOk.h".*/
   diff
-checkoutOk.h contents
+/.*checkoutOk.h contents/
 
 >> Test failure due to invalid remote path
 !.*"AuxFiles[\\/]invalidDir.h".*!
@@ -48,7 +47,7 @@ checkoutOk.h contents
 echo window 1:
 
 nodiff
-/.*cleartool: Error: Unable to access "/AuxFiles/invalidDir\.h": No such file or directory\./
+!.*cleartool: Error: Unable to access "/AuxFiles/invalidDir\.h": No such file or directory\.!
 
 echo window 2:
 

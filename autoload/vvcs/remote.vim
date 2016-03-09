@@ -50,24 +50,22 @@ let g:vvcs#remote#op['ClearCase'] = {
          \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C --stats ".
             \ s:rsyncExcludePat().
             \ " <path> -e ssh ".g:vvcs_remote_host.":/view/".
-            \ g:vvcs_remote_branch."/".g:vvcs_remote_mark."<path>"',
+            \ g:vvcs_remote_repo."/".g:vvcs_remote_mark."<path>"',
          \'localCommand' : '',
    \},
    \'down' : {
          \'args' : ['<path>', '<overw:>'],
          \'cmd': '"rsync -azv<overw:v:val?'''':''u''>C --stats ".
             \ s:rsyncExcludePat().
-            \ " -e ssh ".g:vvcs_remote_host.":/view/".g:vvcs_remote_branch.
+            \ " -e ssh ".g:vvcs_remote_host.":/view/".g:vvcs_remote_repo.
             \ "/".g:vvcs_remote_mark."<path> <path>"',
          \'localCommand' : '',
    \},
-   \'pred' : {
-         \'args' : ['<filepath>'],
-         \'cmd':  '"cat ".g:vvcs_remote_mark.
-            \"<filepath>@@\\`cleartool descr -pred -short ".g:vvcs_remote_mark.
-            \"<filepath>\\`"',
-         \'silent' : '',
-         \'message' : 'retrieving previous version of <filepath> ...',
+   \'info' : {
+         \'args' : ['<fileversion>', '<prev:>'],
+         \'cmd':  '"echo -n \\`cleartool descr -short <prev:v:val?''-pred '' :''''>".
+            \ "<fileversion>\\` | sed s/.\\*@//"',
+         \'message' : 'retrieving info of <prev:v:val?''previous '':''''><fileversion> ...',
    \},
    \'checkout' : {
          \'args' : ['<path>'],
@@ -83,7 +81,7 @@ let g:vvcs#remote#op['ClearCase'] = {
          \'cmd':  '"ct lsco -avobs -cview"',
          \'message' : 'retrieving file list ...',
          \'filter': 'v:val !~ "\\vadded (directory|file) element"',
-         \'adjust': 'vvcs#remote#toLocalPath('
+         \'adjustLine': 'vvcs#remote#toLocalPath('
                \ .'substitute(v:val, ''\v.*"([^"]{-})".*'', "\\1", "g"))',
    \},
    \'catVersion' : {
@@ -100,7 +98,7 @@ let g:vvcs#remote#op['ClearCase'] = {
 
 
 " Note: checkedoutList for svn assumes that g:vvcs_fix_path['sub'] contains
-" the remote root directory, as it there is no svn command to retrieve this
+" the remote root directory, as there is no svn command to retrieve this
 " information (it is not present on 'svn info' of svn version 1.6.11)
 let g:vvcs#remote#op['svn'] = { 
    \'up' : {
@@ -119,19 +117,32 @@ let g:vvcs#remote#op['svn'] = {
             \"<path> <path>"',
          \'localCommand' : '',
    \},
-   \'pred' : {
-         \'args' : ['<filepath>'],
-         \'cmd':  '"svn cat --non-interactive -r HEAD ".g:vvcs_remote_mark.
-            \ "<filepath>"',
-         \'silent' : '',
-         \'message' : 'retrieving previous version of <filepath> ...',
-   \},
    \ 'checkedoutList' : {
          \'args' : [],
          \'cmd':  '"svn status ".g:vvcs_fix_path["sub"]',
          \'message' : 'retrieving file list ...',
-         \'adjust': 'vvcs#remote#toLocalPath('
+         \'adjustLine': 'vvcs#remote#toLocalPath('
                \ .'substitute(v:val, ''\v^\S\s*'', "", "g"))',
+   \},
+   \'isCheckedout' : {
+         \'args' : ['<path>'],
+         \'cmd':  '"svn st ".g:vvcs_remote_mark."<path>"',
+         \'message' : 'checking for modifications on <path> ...',
+         \'adjustLine': '!empty(v:val)',
+   \},
+   \'info' : {
+         \'args' : ['<fileversion>', '<prev:>'],
+         \'cmd':  '"svn info <prev:v:val?''-r PREV '':''''><fileversion>"',
+         \'message' : 'retrieving info '
+               \ .'of <prev:v:val?''previous '':''''><fileversion> ...',
+         \'adjustAll': 'substitute(v:val, '
+               \ .'''\v.*URL:\s*(\p+).*Revision:\s*(\d+).*'', ''\1@\2'', '''')',
+   \},
+   \'catVersion' : {
+         \'args' : ['<remFile>'],
+         \'cmd': '"svn cat <remFile>"',
+         \'silent' : '',
+         \'message' : 'retrieving <remFile> ...',
    \},
    \'make' : {
          \'args' : ['<path>'],
@@ -200,6 +211,10 @@ function! vvcs#remote#execute(key, ...) " {{{1
          let parPattern = substitute(par, ':', ':\\([^>]*\\)', '')
          let cmd = substitute(cmd, parPattern, 
                   \ '\=eval(substitute(submatch(1), "v:val", val, ""))', 'g')
+         if exists("l:message")
+            let message = substitute(message, parPattern, 
+                  \ '\=eval(substitute(submatch(1), "v:val", val, ""))', 'g')
+         endif
       endif
       let cmd = substitute(cmd, par, val, 'g')
       if exists("l:message")
@@ -227,9 +242,13 @@ function! vvcs#remote#execute(key, ...) " {{{1
       let ret['value'] = join(filter(split(ret['value'], "\n"), 
                \ operation[a:key]['filter']), "\n")
    endif
-   if has_key(operation[a:key], 'adjust')
+   if has_key(operation[a:key], 'adjustLine')
       let ret['value'] = join(map(split(ret['value'], "\n"), 
-               \ operation[a:key]['adjust']), "\n")
+               \ operation[a:key]['adjustLine']), "\n")
+   endif
+   if has_key(operation[a:key], 'adjustAll')
+      let ret['value'] = join(map([ret['value']],
+               \ operation[a:key]['adjustAll']), "\n")
    endif
 
    """""""""""""""""""""""

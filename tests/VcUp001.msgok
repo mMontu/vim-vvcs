@@ -1,8 +1,8 @@
 
 >> Test successful invocation without arguments
 
-!.*Will execute: rsync -azvuC.*AuxFiles/readWrite\.h -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/readWrite\.h.*!
 
+!.*Will execute: rsync -azvuC.*AuxFiles/readWrite\.h -e ssh <remote_host>:/view/<remote_repo>/.*AuxFiles/readWrite\.h.*!
 /.*receiving file list ... done.*/
 
 /.*sent \d\+ bytes  received \d\+ bytes  \d\+\.\?\d* bytes\/sec/
@@ -10,7 +10,7 @@
 
 >> Test successful invocation without arguments overwriting
 
-!.*Will execute: rsync -azvC.*AuxFiles/readWrite\.h -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/readWrite\.h.*!
+!.*Will execute: rsync -azvC.*AuxFiles/readWrite\.h -e ssh <remote_host>:/view/<remote_repo>/.*AuxFiles/readWrite\.h.*!
 
 /.*receiving file list ... done.*/
 
@@ -19,7 +19,7 @@
 
 >> Test successful invocation with arguments
 
-!.*Will execute: .*AuxFiles/readOnly\.h -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/readOnly\.h.*!
+!.*Will execute: .*AuxFiles/readOnly\.h -e ssh <remote_host>:/view/<remote_repo>/.*AuxFiles/readOnly\.h.*!
 
 /.*receiving file list ... done.*/
 

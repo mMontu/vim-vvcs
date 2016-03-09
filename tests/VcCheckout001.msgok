@@ -6,7 +6,7 @@
 
 !.*Checked out .*AuxFiles/checkoutOk\.h.* from version .*!
 
-!.*Will execute: .* -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/checkoutOk\.h .*AuxFiles/checkoutOk\.h.*!
+!.*Will execute: .* -e ssh <remote_host>:/view/<remote_repo>/.*AuxFiles/checkoutOk\.h .*AuxFiles/checkoutOk\.h.*!
 
 !.*receiving file list ... done\(\(failed\)\@!\_.\)\{-}sent \d\+ bytes  received \d\+ bytes  \d\+\.\?\d* bytes\/sec!
 /.*total size is \d\+  speedup is \d\+\.\?\d*/
@@ -26,7 +26,7 @@
 
 !.*Checked out .*AuxFiles/readOnly\.h.* from version .*!
 
-!.*Will execute: .* -e ssh <remote_host>:/view/<remote_branch>/.*AuxFiles/readOnly\.h .*AuxFiles/readOnly\.h.*!
+!.*Will execute: .* -e ssh <remote_host>:/view/<remote_repo>/.*AuxFiles/readOnly\.h .*AuxFiles/readOnly\.h.*!
 
 /.*receiving file list ... done.*/
 /.*rsync: .* failed: Read-only file system.*/

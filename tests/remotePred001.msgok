@@ -3,9 +3,6 @@
 
 readOnly.h previous contents
 
->> [ClearCase] Test failure due to invalid local path
-/\[[^]]*\] invalid path:.*/
-
 >> [ClearCase] Test failure due to invalid remote path
 
 /.*cleartool: Error: Unable to access .*/

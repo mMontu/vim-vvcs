@@ -118,9 +118,15 @@ let s:systemStub = {
          \   '"/AuxFiles/invalidDir.h": No such file or directory.',
    \},
    \'\<cat\> \S*@@\S*$': {
-         \'readOnly\.h\>\|readWrite\.h\>\|checkoutOk\.h\>' : "%s contents\n\n",
-         \'newFile\.h\S\+\/[^0]\d*$' : "%s contents\n\n",
-         \'newFile\.h\S\+\/0\>$' : "",
+         \'\v\S*newFile\S*\@\@\S*\/0$' : "",
+         \'\v\s\zs((newFile)@<!\S)*\@\@\S*' : "%s contents\n",
+         \'\v\S*\@\@\S*(\/0)@<!$' : "%s contents\n",
+   \},
+   \'\<cat\>\s\+[^@]\+\>': {
+         \'readOnly.h_previous': "readOnly.h previous contents\n",
+         \'readWrite.h_previous': "readWrite.h previous contents\n\n",
+         \'invalidDir.h': 'cleartool: Error: Unable to access '.
+         \   '"/AuxFiles/invalidDir.h": No such file or directory.',
    \},
    \'\<ct co\>' : {
          \'readOnly.h': 'Checked out "/AuxFiles/readOnly.h" from version '.
@@ -145,6 +151,24 @@ let s:systemStub = {
          \'.': "15-Jul-2014    user     checkout version \"/vobs/readWrite.h\" from /my/branch/1 (unreserved)\n".
          \     "13-Jul-2014    user     checkout version \"/vobs/checkoutOk.h\" from /my/branch/4 (unreserved)\n",
    \},
+   \'\<echo\> .*cleartool descr -short -pred': {
+         \'@@\zs[^\\]*': "substitute('%s', '\\d\\+$', '\\=submatch(0)-1', '')",
+         \'readOnly.h[^@]': "readOnly.h_previous",
+         \'readWrite.h[^@]': "readWrite.h_previous",
+         \'checkoutOk.h[^@]': "checkoutOk.h_previous",
+         \'invalidDir.h[^@]': 'cleartool: Error: Unable to access '.
+         \   '"/AuxFiles/invalidDir.h[^@]": No such file or directory.',
+         \'newFile\.h': "/main/myBranch/0",
+   \},
+   \'\<echo\> .*cleartool descr -short [^-]': {
+         \'@@\zs[^\\]*': "%s",
+         \'readWrite.h[^@]': "checkedout",
+         \'checkoutOk.h[^@]': "checkoutOk.h",
+         \'readOnly.h[^@]': "readOnly.h",
+         \'invalidDir.h[^@]': 'cleartool: Error: Unable to access '.
+         \   '"/AuxFiles/invalidDir.h": No such file or directory.',
+         \'newFile\.h': "/main/myBranch/1",
+   \},
 \}
 
 function! VvcsSystem(expr)
@@ -164,8 +188,12 @@ function! VvcsSystem(expr)
                   let g:VvcsSystemShellError = 1
                endif
                if match(s:systemStub[cmd][key], '%s') != -1
-                  return substitute(s:systemStub[cmd][key], '%s', 
-                           \ split(remoteCmd)[1], '')
+                  let val = substitute(s:systemStub[cmd][key], '%s', 
+                           \ matchstr(remoteCmd, key), '')
+                  if val =~# '^substitute('
+                     let val = eval(val)
+                  endif
+                  return val
                else
                   return s:systemStub[cmd][key]
                endif

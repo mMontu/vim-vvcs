@@ -2,13 +2,13 @@
 
 echo window 1:
 
-/"OLD readWrite.h".*/
+/"OLD \[readWrite.h_previous] readWrite.h".*/
   diff
-readWrite.h previous contents
+!.*readWrite.h_previous contents!
 
 echo window 2:
 
-/"AuxFiles[\\/]readWrite.h".*/
+/".*AuxFiles[\\/]readWrite.h".*/
 nodiff
 <empty file>
 
@@ -28,16 +28,16 @@ nodiff
 <EchoAllWindows: 3>
 echo window 1:
 
-/"OLD checkoutOk.h".*/
+/"OLD \[checkoutOk.h_previous] checkoutOk.h".*/
   diff
 
-checkoutOk.h previous contents
+!.*checkoutOk.h@@checkoutOk.h_previous contents!
 
 echo window 2:
 
-/"AuxFiles[\\/]checkoutOk\.h" line 1 of 1.*/
+/"NEW \[checkoutOk.h] checkoutOk.h"\s*line 1 of 1.*/
   diff
-checkoutOk.h contents
+!.*checkoutOk.h@@checkoutOk.h contents!
 
 echo window 3:
 
@@ -94,13 +94,13 @@ nodiff
 
 echo window 1:
 
-/"OLD readWrite.h".*/
+/"OLD \[readWrite.h_previous] readWrite.h".*/
   diff
-readWrite.h previous contents
+!.*readWrite.h@@readWrite.h_previous contents!
 
 echo window 2:
 
-/"AuxFiles[\\/]readWrite.h".*/
+!".*AuxFiles[\\/]readWrite.h".*!
 nodiff
 <empty file>
 

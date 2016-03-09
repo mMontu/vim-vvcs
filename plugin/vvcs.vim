@@ -80,8 +80,8 @@ endif
 if !exists("g:vvcs_remote_host")
    let g:vvcs_remote_host = "<remote_host>"
 endif
-if !exists("g:vvcs_remote_branch")
-   let g:vvcs_remote_branch = "<remote_branch>"
+if !exists("g:vvcs_remote_repo")
+   let g:vvcs_remote_repo = "<remote_repo>"
 endif
 if !exists("g:vvcs_exclude_patterns")
    let g:vvcs_exclude_patterns = ['*.class', '.cmake.state', '*.swp', 
@@ -91,7 +91,7 @@ if !exists("g:vvcs_cache_dir")
    let g:vvcs_cache_dir = $HOME.'/.cache/vvcs'
 endif
 if !exists("g:vvcs_review_comment")
-   let g:vvcs_review_comment = "#"
+   let g:vvcs_review_comment = ['#', '"']
 endif
 if !exists("g:vvcs_log_location")
    let g:vvcs_log_location = '/log/%Y/%m/%d.log'
