@@ -157,28 +157,23 @@ function! vvcs#remote#execute(key, ...) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Run the command on the g:vvcs#remote#op dict for the specified key. 
 "
-" Returns a dictionary (ret), where ret['error'] contains the error message
-" and ret['value'] contains valid information iff empty(ret['error']).
+" The return value starts with g:vvcs_PLUGIN_TAG if some error occurs.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    """"""""""""""""""""""""""""""""""
    "  Check for invalid parameters  "
    """"""""""""""""""""""""""""""""""
-   let ret = {'error' : '', 'value' : ''}
+   let out = ''
    if !has_key(g:vvcs#remote#op, g:vvcs_remote_vcs)
-      let ret['error'] = vvcs#log#error('g:vvcs_remote_vcs invalid: '.
-               \ g:vvcs_remote_vcs."; valid values: ".
-               \ string(keys(g:vvcs#remote#op)))
-      return ret
+      return vvcs#log#error('g:vvcs_remote_vcs invalid: '. g:vvcs_remote_vcs.
+               \ "; valid values: ".string(keys(g:vvcs#remote#op)))
    endif
    let operation = g:vvcs#remote#op[g:vvcs_remote_vcs]
    if !has_key(operation, a:key)
-      let ret['error'] = vvcs#log#error('unknown command: '.a:key)
-      return ret
+      return vvcs#log#error('unknown command: '.a:key)
    endif
    if a:0 != len(operation[a:key].args)
-      let ret['error'] = vvcs#log#error("incorrect number of parameters for '".
+      return vvcs#log#error("incorrect number of parameters for '".
                \ a:key."': ".string(a:000))
-      return ret
    endif
 
    """""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -194,16 +189,14 @@ function! vvcs#remote#execute(key, ...) " {{{1
       if par =~# 'path'
          let val = s:handlePath(val)
          if empty(val)
-            let ret['error'] = 's:handlePath error'
-            return ret
+            return g:vvcs_PLUGIN_TAG.'s:handlePath error'
          endif
          " duplicate escapes as the substitute() below will remove them
          let val = escape(val, '\') 
          " apply the transformation from local path to the remote filesystem
          let remPath = vvcs#remote#toRemotePath(val)
          if empty(remPath)
-            let ret['error'] = 'vvcs#remote#toRemotePath error'
-            return ret
+            return g:vvcs_PLUGIN_TAG.'vvcs#remote#toRemotePath error'
          endif
          let cmd = substitute(cmd, g:vvcs_remote_mark . par, remPath, 'g')
       endif
@@ -233,38 +226,43 @@ function! vvcs#remote#execute(key, ...) " {{{1
       call vvcs#log#msg(message)
    endif
    if has_key(operation[a:key], 'dryRun')
-      let ret['value'] = cmd
-      return ret
+      return cmd
    else
-      let ret['value'] = VvcsSystem(cmd)
+      let out = VvcsSystem(cmd)
    endif
-   if has_key(operation[a:key], 'filter')
-      let ret['value'] = join(filter(split(ret['value'], "\n"), 
-               \ operation[a:key]['filter']), "\n")
-   endif
-   if has_key(operation[a:key], 'adjustLine')
-      let ret['value'] = join(map(split(ret['value'], "\n"), 
-               \ operation[a:key]['adjustLine']), "\n")
-   endif
-   if has_key(operation[a:key], 'adjustAll')
-      let ret['value'] = join(map([ret['value']],
-               \ operation[a:key]['adjustAll']), "\n")
+
+   """""""""""""""""""""""""
+   "  Perform adjustments  "
+   """""""""""""""""""""""""
+   if !g:VvcsSystemShellError
+      if has_key(operation[a:key], 'filter')
+         let out = join(filter(split(out, "\n"), 
+                  \ operation[a:key]['filter']), "\n")
+      endif
+      if has_key(operation[a:key], 'adjustLine')
+         let out = join(map(split(out, "\n"), 
+                  \ operation[a:key]['adjustLine']), "\n")
+      endif
+      if has_key(operation[a:key], 'adjustAll')
+         let out = join(map([out],
+                  \ operation[a:key]['adjustAll']), "\n")
+      endif
    endif
 
    """""""""""""""""""""""
    "  Check for failure  "
    """""""""""""""""""""""
    if g:VvcsSystemShellError
-      let ret['error'] = vvcs#log#error("Failed to execute '".a:key."' ("
+      let errorMsg = vvcs#log#error("Failed to execute '".a:key."' ("
                \ .g:VvcsSystemShellError.")")
-      call vvcs#log#append(split(ret['value'], "\n"))
+      call vvcs#log#append(split(out, "\n"))
       call vvcs#log#open()
-      return ret
+      return errorMsg
    elseif !has_key(operation[a:key], 'silent')
-      call vvcs#log#append(split(ret['value'], "\n"))
+      call vvcs#log#append(split(out, "\n"))
    endif
 
-   return ret
+   return out
 endfunction
 
 function! vvcs#remote#toRemotePath(localPath) " {{{1

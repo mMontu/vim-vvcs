@@ -119,8 +119,8 @@ let s:systemStub = {
    \},
    \'\<cat\> \S*@@\S*$': {
          \'\v\S*newFile\S*\@\@\S*\/0$' : "",
-         \'\v\s\zs((newFile)@<!\S)*\@\@\S*' : "%s contents\n",
-         \'\v\S*\@\@\S*(\/0)@<!$' : "%s contents\n",
+         \'\v\S*\S*\@\@(readWrite|checkoutOk)\.h_previous$' : "%s contents\n\n",
+         \'\v\S*\@\@\S*$' : "%s contents\n",
    \},
    \'\<cat\>\s\+[^@]\+\>': {
          \'readOnly.h_previous': "readOnly.h previous contents\n",
@@ -182,7 +182,7 @@ function! VvcsSystem(expr)
    endif
    for cmd in keys(s:systemStub)
       if match(remoteCmd, cmd) != -1
-         for key in keys(s:systemStub[cmd])
+         for key in reverse(sort(keys(s:systemStub[cmd])))
             if match(remoteCmd, key) != -1
                if s:systemStub[cmd][key] =~? '\<Error\>\|\<Fail'
                   let g:VvcsSystemShellError = 1

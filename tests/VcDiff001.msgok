@@ -33,7 +33,7 @@ echo window 2:
 /"OLD \[checkoutOk.h_previous] checkoutOk.h"\s*line \d of 2.*/
   diff
 
-checkoutOk.h previous contents
+!.*checkoutOk.h_previous contents!
 
 echo window 3:
 
@@ -47,10 +47,11 @@ echo window 3:
 echo window 1:
 
 nodiff
-!.*cleartool: Error: Unable to access "/AuxFiles/invalidDir\.h": No such file or directory\.!
+
 
 echo window 2:
 
 nodiff
-invalidDir.h contents
+
+!.*cleartool: Error: Unable to access "/AuxFiles/invalidDir\.h.*": No such file or directory\.!
 

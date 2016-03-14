@@ -6,7 +6,6 @@ let save_cpo = &cpo   " allow line continuation
 set cpo&vim
 
 " constants {{{1
-let s:PLUGIN_TAG = '[vvcs] '
 let s:MAX_ARG_LENGTH = 60
 
 " variables {{{1
@@ -16,13 +15,14 @@ let s:currentCmd = ''
 function! vvcs#log#error(msg) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Output an error message to display and log file. Return the formmatted error
-" message, which can be used on a throw statement.
+" message, which can be used on a throw statement. The messages always start
+" with the g:vvcs_PLUGIN_TAG.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    echohl ErrorMsg
-   echomsg s:PLUGIN_TAG.a:msg
+   echomsg g:vvcs_PLUGIN_TAG.a:msg
    echohl None
    call vvcs#log#append(['>>> Error <<<', a:msg])
-   return s:PLUGIN_TAG.a:msg
+   return g:vvcs_PLUGIN_TAG.a:msg
 endfunction
 
 function! vvcs#log#msg(msg) " {{{1
@@ -30,7 +30,7 @@ function! vvcs#log#msg(msg) " {{{1
 " Output a message to display and log file
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    echohl Question
-   echo s:PLUGIN_TAG.a:msg
+   echo g:vvcs_PLUGIN_TAG.a:msg
    echohl None
    call vvcs#log#append(['>>> Msg <<<', a:msg])
 endfunction
@@ -63,7 +63,7 @@ function! vvcs#log#startCommand(cmd, ...) " {{{1
       let cmd .= '...'
    endif
    echohl Directory
-   echo s:PLUGIN_TAG.cmd
+   echo g:vvcs_PLUGIN_TAG.cmd
    echohl None
    call vvcs#log#append(['>>> '.cmd.' <<<'])
 endfunction
@@ -83,7 +83,7 @@ function! vvcs#log#commandSucceed(cmd, ...) " {{{1
          let msg .= ' ('.a:1.')'
       endif
       echohl Question
-      echo s:PLUGIN_TAG.msg
+      echo g:vvcs_PLUGIN_TAG.msg
       echohl None
       call vvcs#log#append(['>>> '.msg.' <<<'])
    endif
@@ -98,7 +98,7 @@ function! vvcs#log#commandFailed(cmd) " {{{1
       let s:currentCmd = ''
       let msg = a:cmd.' failed'
       echohl Question
-      echomsg s:PLUGIN_TAG.msg
+      echomsg g:vvcs_PLUGIN_TAG.msg
       echohl None
       call vvcs#log#append(['>>> '.msg.' <<<'])
    endif

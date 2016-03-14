@@ -27,10 +27,10 @@ function! vvcs#up(overwrite, ...) " {{{1
    endif
    call vvcs#log#startCommand('VcUp', path)
    let ret = vvcs#remote#execute('up', path, a:overwrite)
-   if !empty(ret['error'])
+   if ret =~# '^\V'.g:vvcs_PLUGIN_TAG
       call vvcs#log#commandFailed('VcUp')
    endif
-   call vvcs#log#commandSucceed('VcUp', substitute(ret['value'], 
+   call vvcs#log#commandSucceed('VcUp', substitute(ret, 
             \ '\v.*files transferred: (\d+).*', 
             \ '\=submatch(1)." file".(submatch(1) == 1 ? "" : "s")', ''))
 endfunction
@@ -46,7 +46,7 @@ function! vvcs#down(overwrite, autoread, ...) " {{{1
    let path = fnamemodify((a:0 ? a:1 : eval(g:vvcs_default_path)), ":p")
    call vvcs#log#startCommand('VcDown', path)
    let ret = vvcs#remote#execute('down', path, a:overwrite)
-   if !empty(ret['error'])
+   if ret =~# '^\V'.g:vvcs_PLUGIN_TAG
       call vvcs#log#commandFailed('VcDown')
       return 0
    endif
@@ -64,7 +64,7 @@ function! vvcs#down(overwrite, autoread, ...) " {{{1
    if restoreBuf
       call setbufvar(bufNum, "&autoread", 0)
    endif
-   call vvcs#log#commandSucceed('VcDown', substitute(ret['value'], 
+   call vvcs#log#commandSucceed('VcDown', substitute(ret, 
             \ '\v.*files transferred: (\d+).*', 
             \ '\=submatch(1)." file".(submatch(1) == 1 ? "" : "s")', ''))
    return 1
@@ -86,7 +86,7 @@ function! vvcs#checkout(autoread, file) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    call vvcs#log#startCommand('VcCheckout')
    let ret = vvcs#remote#execute('checkout', a:file)
-   if empty(ret['error'])
+   if ret !~# '^\V'.g:vvcs_PLUGIN_TAG
       if vvcs#down(1, a:autoread || (&readonly && !&modified), a:file)
          call vvcs#log#commandSucceed('VcCheckout')
          return
@@ -139,12 +139,12 @@ function! vvcs#listCheckedOut() " {{{1
 " Display diff of currently checkouted files and its predecessors
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    let retCheckedoutL = vvcs#remote#execute('checkedoutList')
-   if !empty(retCheckedoutL['error'])
+   if retCheckedoutL =~# '^\V'.g:vvcs_PLUGIN_TAG
       return
    endif
    let fileList = "\n".s:VVCS_STAGED_MARKER."\n\n"
    let fileList .= s:VVCS_NOT_STAGED_MARKER."\n"
-   let fileList .= retCheckedoutL['value']
+   let fileList .= retCheckedoutL
    let fileList .= "\n\n"
    let file = vvcs#utils#writeCacheFile(split(fileList, '\n'), 
             \ s:VVCS_LIST_CHECKEDOUT_FILE)
@@ -214,7 +214,7 @@ function! vvcs#commitList() " {{{1
       " performed on the correct content - notify the user if the file on
       " remote is different
       let ret = vvcs#remote#execute('commit', line, commitMsg)
-      if empty(ret['error'])
+      if ret !~# '^\V'.g:vvcs_PLUGIN_TAG
          exe 'VcDown! '.line
       else
          call vvcs#log#error("failed to commit '".line."'")
@@ -249,7 +249,7 @@ function! vvcs#make(...) " {{{1
    exe "VcUp ".path
    call vvcs#log#startCommand('VcMake', path)
    let makeprgSave = &makeprg
-   let &makeprg = vvcs#remote#execute('make', path)['value']
+   let &makeprg = vvcs#remote#execute('make', path)
    echom "&makeprg = ".&makeprg
    " XXX how to handle the different paths for VcUp and make? extracting 'cd
    " path' from g:vvcs_make_cmd may not work if it refers to a directory that
@@ -266,15 +266,15 @@ function! vvcs#make(...) " {{{1
    " XXX XXX XXX this works only if "augroup changeQfCmdDir" is disabled
    make
    let &makeprg = makeprgSave
-   " XXX echom "ret['value'] = ".ret['value']
-   " XXX if !empty(ret['error'])
+   " XXX echom "ret = ".ret
+   " XXX if ret =~# '^\V'.g:vvcs_PLUGIN_TAG
    " XXX    quit " close the log window
    " XXX endif
    " XXX " based on  https://github.com/MarcWeber/vim-addon-qf-layout
    " XXX copen
    " XXX setl modifiable
    " XXX %delete
-   " XXX call append(1, split(ret['value'], "\n"))
+   " XXX call append(1, split(ret, "\n"))
   
    " XXX maybe call make directly here, either replicating part of remote.vim
    " here in order to include the ssh command, or include an extra key on the

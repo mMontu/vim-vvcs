@@ -106,6 +106,8 @@ if !exists("g:vvcs_make_cmd")
    let g:vvcs_make_cmd = 'make'
 endif
 
+" constants {{{1
+let g:vvcs_PLUGIN_TAG = '[vvcs] '
 
 function! VvcsSystem(expr) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

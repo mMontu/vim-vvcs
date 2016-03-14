@@ -35,7 +35,7 @@ function! g:vvcs#comparison#get['ClearCase'].pathAndVersion(index, list) dict
       " two files specified
       let splitItem = split(item, '\s*;\s*')
       if len(splitItem) != 2
-         return ['error: invalid number of files: '.len(splitItem)]
+         return [g:vvcs_PLUGIN_TAG.'invalid number of files: '.len(splitItem)]
       else
          let ret = splitItem
       endif
@@ -51,8 +51,10 @@ function! g:vvcs#comparison#get['ClearCase'].pathAndVersion(index, list) dict
          let path = vvcs#remote#toRemotePath(path)
          " call vvcs#log#msg("converted path: ".path)
       endif
-      call add(ret, path."@@".vvcs#remote#execute('info', path.rev, 1)['value'])
-      call add(ret, path."@@".vvcs#remote#execute('info', path.rev, 0)['value'])
+      call add(ret, path."@@".vvcs#remote#execute('info', path.rev, 1))
+      if ret[len(ret)-1] !~# '\V'.g:vvcs_PLUGIN_TAG
+         call add(ret, path."@@".vvcs#remote#execute('info', path.rev, 0))
+      endif
    endif
 
    return ret
@@ -90,14 +92,14 @@ function! g:vvcs#comparison#get['svn'].pathAndVersion(index, list) dict
       let BRANCH_PAT = '\vCommitted revision\s*\d+\.\s*(\S+).*'
       let branchIdx = vvcs#utils#indexRegex(a:list, BRANCH_PAT, a:index, 0, 1)
       if branchIdx == -1
-         let ret = ['error: unable to determine the branch']
+         let ret = [g:vvcs_PLUGIN_TAG.'unable to determine the branch']
       else
          let item = substitute(item, '\v^\s*Sending\s+', '', '')
          let branch = substitute(a:list[branchIdx], BRANCH_PAT, '\1', '')
          " call vvcs#log#msg("branch: ".branch)
          " let item = g:vvcs_remote_repo.'/'.branch.'/'.item.'@'.rev
-         " call add(ret, vvcs#remote#execute('info', item, 1)['value'])
-         " call add(ret, vvcs#remote#execute('info', item, 0)['value'])
+         " call add(ret, vvcs#remote#execute('info', item, 1))
+         " call add(ret, vvcs#remote#execute('info', item, 0))
          let item = g:vvcs_remote_repo.'/'.branch.'/'.item
          call add(ret, item.'@'.(rev-1))
          call add(ret, item.'@'.rev)
@@ -105,20 +107,27 @@ function! g:vvcs#comparison#get['svn'].pathAndVersion(index, list) dict
    else  " rev == -1
       let isCheckedout = 0
       if filereadable(item)
-         let isCheckedout = vvcs#remote#execute('isCheckedout', item)['value']
+         let isCheckedout = vvcs#remote#execute('isCheckedout', item)
+         if isCheckedout =~# g:vvcs_PLUGIN_TAG
+            return [isCheckedout]
+         endif
          " info command below expects remote path
          let item = vvcs#remote#toRemotePath(item)
          " call vvcs#log#msg("converted path: ".item)
       endif
 
       if isCheckedout
-         call add(ret, vvcs#remote#execute('info', item, 0)['value'])
-         call add(ret, item."@checkedout")
+         call add(ret, vvcs#remote#execute('info', item, 0))
+         if ret[len(ret)-1] !~# '\V'.g:vvcs_PLUGIN_TAG
+            call add(ret, item."@checkedout")
+         endif
       else
-         call add(ret, vvcs#remote#execute('info', item, 1)['value'])
-         call add(ret, vvcs#remote#execute('info', item, 0)['value'])
-         " NOTE: maybe change the line above to @checkedout to avoid one
-         " 'info' if it becomes too slow; 
+         call add(ret, vvcs#remote#execute('info', item, 1))
+         if ret[len(ret)-1] !~# '\V'.g:vvcs_PLUGIN_TAG
+            call add(ret, vvcs#remote#execute('info', item, 0))
+            " NOTE: maybe change the line above to @checkedout to avoid one
+            " 'info' if it becomes too slow; 
+         endif
       endif
    endif
 
@@ -257,15 +266,20 @@ function! s:compareItem(index, list) " {{{1
 " Handle a line in the file list or a single diff 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    " call vvcs#log#msg("index: ".a:index.", list: ".string(a:list))
-   let pathAndVer = g:vvcs#comparison#get[g:vvcs_remote_vcs].pathAndVersion(a:index, a:list)
+   let pathAndVer = g:vvcs#comparison#get[g:vvcs_remote_vcs].pathAndVersion(
+            \ a:index, a:list)
    " call vvcs#log#msg("vers: ".string(pathAndVer))
    " return
    if empty(pathAndVer)
       call vvcs#log#msg("no diff to display")
       return
-   elseif pathAndVer[0] =~# '^error:'
-      call vvcs#log#error(substitute(pathAndVer[0], '^error:\s*', '', ''))
-      return
+   else
+      for elem in pathAndVer
+         if elem =~# '\V'.g:vvcs_PLUGIN_TAG
+            call vvcs#log#error(substitute(elem, g:vvcs_PLUGIN_TAG, '', ''))
+            return
+         endif
+      endfor
    endif
 
    let file = [
@@ -286,7 +300,7 @@ function! s:compareItem(index, list) " {{{1
          let versTail = substitute(splitPath[1], '\v.*/([^/]+/[^/]+$)', '\1', '')
          let file[i].name = "[".versTail."] ".path
          let file[i].cmd = "call s:setLines(".
-                  \ "vvcs#remote#execute('catVersion', '".pathAndVer[i]."')['value'])"
+                  \ "vvcs#remote#execute('catVersion', '".pathAndVer[i]."'))"
       endif
    endfor
 
