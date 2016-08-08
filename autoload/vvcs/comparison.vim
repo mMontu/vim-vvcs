@@ -105,15 +105,15 @@ function! g:vvcs#comparison#get['svn'].pathAndVersion(index, list) dict
          call add(ret, item.'@'.rev)
       endif
    else  " rev == -1
-      let isCheckedout = 0
       if filereadable(item)
-         let isCheckedout = vvcs#remote#execute('isCheckedout', item)
-         if isCheckedout =~# g:vvcs_PLUGIN_TAG
-            return [isCheckedout]
-         endif
-         " info command below expects remote path
+         " commands below expect remote path
          let item = vvcs#remote#toRemotePath(item)
          " call vvcs#log#msg("converted path: ".item)
+      endif
+
+      let isCheckedout = vvcs#remote#execute('isCheckedout', item)
+      if isCheckedout =~# g:vvcs_PLUGIN_TAG
+         return [isCheckedout]
       endif
 
       if isCheckedout

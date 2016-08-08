@@ -125,9 +125,9 @@ let g:vvcs#remote#op['svn'] = {
                \ .'substitute(v:val, ''\v^\S\s*'', "", "g"))',
    \},
    \'isCheckedout' : {
-         \'args' : ['<path>'],
-         \'cmd':  '"svn st ".g:vvcs_remote_mark."<path>"',
-         \'message' : 'checking for modifications on <path> ...',
+         \'args' : ['<remFile>'],
+         \'cmd':  '"svn status <remFile>"',
+         \'message' : 'checking for modifications on <remFile> ...',
          \'adjustLine': '!empty(v:val)',
    \},
    \'info' : {
@@ -136,7 +136,7 @@ let g:vvcs#remote#op['svn'] = {
          \'message' : 'retrieving info '
                \ .'of <prev:v:val?''previous '':''''><fileversion> ...',
          \'adjustAll': 'substitute(v:val, '
-               \ .'''\v.*URL:\s*(\p+).*Revision:\s*(\d+).*'', ''\1@\2'', '''')',
+               \ .'''\v.*\nURL:\s*(\p+).*Revision:\s*(\d+).*'', ''\1@\2'', '''')',
    \},
    \'catVersion' : {
          \'args' : ['<remFile>'],
@@ -234,6 +234,7 @@ function! vvcs#remote#execute(key, ...) " {{{1
    """""""""""""""""""""""""
    "  Perform adjustments  "
    """""""""""""""""""""""""
+   " echom "before adjustments: ".out
    if !g:VvcsSystemShellError
       if has_key(operation[a:key], 'filter')
          let out = join(filter(split(out, "\n"), 
@@ -244,8 +245,15 @@ function! vvcs#remote#execute(key, ...) " {{{1
                   \ operation[a:key]['adjustLine']), "\n")
       endif
       if has_key(operation[a:key], 'adjustAll')
-         let out = join(map([out],
-                  \ operation[a:key]['adjustAll']), "\n")
+         " echom "before: ".out
+         " the purpose of adjustAll is to execute a command on the entire
+         " result of a remote command, allowing a single substitute() to adapt
+         " all the lines
+         " using double eval to mimic map() double evaluation
+         let out = eval(eval(substitute(
+                  \ string(g:vvcs#remote#op['svn']['info']['adjustAll']),
+                  \ 'v:val', "''".out."''", 'g')))
+         " echom "after: ".out
       endif
    endif
 
@@ -273,8 +281,11 @@ function! vvcs#remote#toRemotePath(localPath) " {{{1
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
    let remPath = s:handlePath(a:localPath)
    if !empty(remPath)
-      let remPath = substitute(remPath, '^'.g:vvcs_fix_path.pat,
-                  \ g:vvcs_fix_path.sub, '')
+      " use g:vvcs_fix_path without ending slashes (a mismatch could make the
+      " result miss a slash)
+      let pat = substitute(g:vvcs_fix_path.pat, '[\/]$', '', '')
+      let sub = substitute(g:vvcs_fix_path.sub, '[\/]$', '', '')
+      let remPath = substitute(remPath, '^'.pat, sub, '')
    endif
    return remPath
 endfunction
@@ -286,8 +297,11 @@ function! vvcs#remote#toLocalPath(remotePath) " {{{1
 " Do not check for invalid paths since it is possible that a file exists on
 " the remote filesystem but wasn't copied to the local machine.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-   let locPath = substitute(a:remotePath, '^'.g:vvcs_fix_path.sub,
-                  \ g:vvcs_fix_path.pat, '')
+   " use g:vvcs_fix_path without ending slashes (a mismatch could make the
+   " result miss a slash)
+   let pat = substitute(g:vvcs_fix_path.pat, '[\/]$', '', '')
+   let sub = substitute(g:vvcs_fix_path.sub, '[\/]$', '', '')
+   let locPath = substitute(a:remotePath, '^'.sub, pat, '')
    if exists('+shellslash')
       let locPath = expand(locPath) " change to backslashes if necessary
    endif
